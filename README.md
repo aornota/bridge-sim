@@ -2,6 +2,8 @@
 
 Work-in-progress on Bridge simulations (double-dummy analysis &c.).
 
+Uses [Double Dummy Solver](http://privat.bahnhof.se/wb758135/bridge/index.html).
+
 #### Development prerequisites
 
 - [Microsoft .NET Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.1/): I'm currently using 3.1.404

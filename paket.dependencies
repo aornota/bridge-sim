@@ -25,4 +25,3 @@ group md-console
 	nuget Serilog
 	nuget Serilog.Settings.Configuration
 	nuget Serilog.Sinks.Console
-	// TODO-NMB: DDS.dll...github krauthaufen/Fable.Elmish.Adaptive

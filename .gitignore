@@ -1,7 +1,11 @@
 .fake/
 .ionide/
+dds290-dll/
 paket-files/
 bin/
 logs/
 obj/
+simulations/
 appsettings.development*.json
+
+dds-interop/
