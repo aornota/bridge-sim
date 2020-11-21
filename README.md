@@ -22,5 +22,9 @@ _[build.fsx](https://github.com/aornota/gibet/blob/master/build.fsx)_)
 
 #### Running / building / publishing / deploying
 
-- Run the dev-console (debug): _fake build --target run-dev-console_ (or just _fake build_)
-- Help (lists key targets): _fake build --target help_ (or _fake build -t help_)
+- Before first running / building:
+    - _dotnet tool restore_
+    - _paket install_
+- Build targets:
+    - Run the dev-console (debug): _fake build --target run-dev-console_ (or just _fake build_)
+    - Help (lists key targets): _fake build --target help_ (or _fake build -t help_)
