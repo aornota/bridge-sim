@@ -1,0 +1,18 @@
+{
+    "editor.fontSize": 13
+    , "files.exclude": {
+		".config/": true
+		, ".fake/": true
+		, ".ionide/": true
+        , ".paket/": true
+		, "paket-files/": true
+		, "src/**/bin/": true
+        , "src/**/logs/": true
+        , "src/**/obj/": true
+        , ".editorconfig": true
+        , "LICENSE": true
+		, "paket.lock": true
+    }
+	, "FSharp.fsacRuntime": "netcore"
+	, "FSharp.suggestSdkScripts": false
+}
