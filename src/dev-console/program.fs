@@ -34,7 +34,7 @@ let private debugOrRelease =
     "Release"
 #endif
 
-let rec private findSrcDir (currentDir:DirectoryInfo) = if currentDir.Name = "src" then currentDir.FullName else findSrcDir currentDir.Parent
+//let rec private findSrcDir (currentDir:DirectoryInfo) = if currentDir.Name = "src" then currentDir.FullName else findSrcDir currentDir.Parent
 
 let private mainAsync argv = async {
     writeNewLine "Running " ConsoleColor.Green
