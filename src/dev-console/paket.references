@@ -1,4 +1,4 @@
-group md-console
+group dev-console
 
 	FSharp.Core
     FsToolkit.ErrorHandling

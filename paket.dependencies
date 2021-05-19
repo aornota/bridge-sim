@@ -13,7 +13,7 @@ group build
     nuget Fake.DotNet.Cli
     nuget Fake.IO.FileSystem
 
-group md-console
+group dev-console
 
     source https://api.nuget.org/v3/index.json
     framework: net5.0

@@ -6,7 +6,7 @@ Uses [Double Dummy Solver](http://privat.bahnhof.se/wb758135/bridge/index.html).
 
 #### Development prerequisites
 
-- [Microsoft .NET Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.1/): I'm currently using 3.1.404
+- [Microsoft .NET 5.0 SDK](https://dotnet.microsoft.com/download/dotnet/5.0): I'm currently using 5.0.203
 
 ##### Also recommended
 
@@ -24,5 +24,5 @@ _[build.fsx](https://github.com/aornota/gibet/blob/master/build.fsx)_)
     - _dotnet tool restore_
     - _paket install_
 - Build targets:
-    - Run the dev-console (debug): _fake build --target run-dev-console_ (or just _fake build_)
-    - Help (lists key targets): _fake build --target help_ (or _fake build -t help_)
+    - Run the dev-console (debug): _dotnet fake build --t run-dev-console_ (or just _fake build_)
+    - Help (lists key targets): _dotnet fake build -t help_

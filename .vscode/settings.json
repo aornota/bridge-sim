@@ -13,6 +13,5 @@
         , "LICENSE": true
 		, "paket.lock": true
     }
-	, "FSharp.fsacRuntime": "netcore"
 	, "FSharp.suggestSdkScripts": false
 }
