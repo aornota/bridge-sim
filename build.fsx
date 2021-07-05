@@ -30,7 +30,7 @@ Target.create "run-dev-console" (fun _ ->
     runDotNet "run" devConsoleDir)
 
 Target.create "help" (fun _ ->
-    printfn "\nThese useful build targets can be run via 'fake build -t {target}':"
+    printfn "\nThese useful build targets can be run via 'dotnet fake build -t {target}':"
     printfn "\n\trun-dev-console -> builds and runs [Debug] dev-console"
     printfn "\n\thelp -> shows this list of build targets\n")
 
