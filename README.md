@@ -6,7 +6,7 @@ Uses [Double Dummy Solver](http://privat.bahnhof.se/wb758135/bridge/index.html).
 
 #### Development prerequisites
 
-- [Microsoft .NET 5.0 SDK](https://dotnet.microsoft.com/download/dotnet/5.0): I'm currently using 5.0.203
+- [Microsoft .NET 5.0 SDK](https://dotnet.microsoft.com/download/dotnet/5.0): I'm currently using 5.0.301
 
 ##### Also recommended
 
@@ -22,7 +22,7 @@ _[build.fsx](https://github.com/aornota/gibet/blob/master/build.fsx)_)
 
 - Before first running:
     - _dotnet tool restore_
-    - _paket install_
+    - _dotnet paket install_
 - Build targets:
     - Run the dev-console (debug): _dotnet fake build --t run-dev-console_ (or just _fake build_)
     - Help (lists key targets): _dotnet fake build -t help_
