@@ -6,7 +6,7 @@ Uses [Double Dummy Solver](http://privat.bahnhof.se/wb758135/bridge/index.html).
 
 #### Development prerequisites
 
-- [Microsoft .NET 5.0 SDK](https://dotnet.microsoft.com/download/dotnet/5.0): I'm currently using 5.0.301
+- [Microsoft .NET 5.0 SDK](https://dotnet.microsoft.com/download/dotnet/5.0): I'm currently using 5.0.400
 
 ##### Also recommended
 
