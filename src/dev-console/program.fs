@@ -60,7 +60,7 @@ let private mainAsync () = async {
         let auction = auction.Bid(South, Pass) // doubleton spades
         let auction = auction.Bid(West, Pass)
 
-        auction.OrderedBids |> List.iter (fun (position, bid) -> write $"\t{position.ShortText} -> {bid.ShortText}\n" ConsoleColor.DarkCyan)
+        auction.Bids |> List.iter (fun (position, bid) -> write $"\t{position.ShortText} -> {bid.ShortText}\n" ConsoleColor.DarkCyan)
 
         match auction.State with
         | Completed contract -> writeNewLine $"\n\tAuction completed -> contract is {contract.ShortText}" ConsoleColor.Cyan

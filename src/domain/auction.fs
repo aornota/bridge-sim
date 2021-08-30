@@ -22,7 +22,7 @@ type Bid = | Pass | Bid of BidLevel * BidSuit | Double | Redouble
 
 type Stakes = Undoubled | Doubled | Redoubled
     with
-    member this.Text = match this with | Undoubled -> "" | Doubled -> "doubled" | Redoubled -> "redoubled"
+    member this.Text = match this with | Undoubled -> "" | Doubled -> " (doubled)" | Redoubled -> " (redoubled)"
     member this.ShortText = match this with | Undoubled -> "" | Doubled -> "x" | Redoubled -> "xx"
 
 type Contract = | Contract of BidLevel * BidSuit * Stakes * declarer:Position | PassedOut
@@ -31,34 +31,29 @@ type Contract = | Contract of BidLevel * BidSuit * Stakes * declarer:Position | 
 
 type AuctionState = | Completed of Contract | AwaitingBid of Position * (BidLevel * BidSuit * bool * bool) option
 
-type Auction = private | Auction of dealer:Position * (Position * Bid) list // head is latest bid
+type Auction = private {
+    Dealer' : Position
+    Bids' : (Position * Bid) list (* head is latest bid *) }
     with
-    static member Make(dealer) = Auction (dealer, [])
-    member private this.IsEmpty =
-        let (Auction (_, bids)) = this
-        match bids with | [] -> true | _ -> false
+    static member Make(dealer) = { Dealer' = dealer; Bids' = [] }
+    member private this.IsEmpty = match this.Bids' with | [] -> true | _ -> false
     member private this.LatestBid =
-        let (Auction (_, bids)) = this
-        match bids |> List.choose (fun (bidder, bid) -> match bid with | Bid (level, suit) -> Some (bidder, level, suit) | _ -> None) with
+        match this.Bids' |> List.choose (fun (bidder, bid) -> match bid with | Bid (level, suit) -> Some (bidder, level, suit) | _ -> None) with
         | [] -> None
         | (bidder, position, bid) :: _ -> Some (bidder, position, bid)
-    member private this.LatestNonPass =
-        let (Auction (_, bids)) = this
-        match bids |> List.filter (fun (_, bid) -> bid <> Pass) with | [] -> None | (position, bid) :: _ -> Some (position, bid)
+    member private this.LatestNonPass = match this.Bids' |> List.filter (fun (_, bid) -> bid <> Pass) with | [] -> None | (position, bid) :: _ -> Some (position, bid)
     member private this.DoubledBy = match this.LatestNonPass with | Some (position, bid) when bid = Double -> Some position | _ -> None
     member private this.RedoubledBy = match this.LatestNonPass with | Some (position, bid) when bid = Redouble -> Some position | _ -> None
     member private this.CurrentPassCount =
         let rec count auction acc = match auction with | [] -> acc | (_, bid) :: t -> if bid = Pass then count t (acc + 1) else acc
-        let (Auction (_, bids)) = this
-        count bids 0
+        count this.Bids' 0
     member private this.Contract =
         match this.LatestBid, this.CurrentPassCount with
         | None, 4 -> Some PassedOut
         | Some (bidder, level, suit), 3 ->
-            let (Auction (_, bids)) = this
             let declarer =
                 let sameSuitAndPartnership =
-                    bids
+                    this.Bids'
                     |> List.rev
                     |> List.filter (fun (position, bid') -> match bid' with | Bid (_, suit') -> suit' = suit && not (position.IsOpponent(bidder)) | _ -> false)
                 match sameSuitAndPartnership with
@@ -76,8 +71,7 @@ type Auction = private | Auction of dealer:Position * (Position * Bid) list // h
         match this.Contract with
         | Some contract -> Completed contract
         | None ->
-            let (Auction (dealer, bids)) = this
-            let nextBidder = match bids with | [] -> dealer | (position, _) :: _ -> position.LHO
+            let nextBidder = match this.Bids' with | [] -> this.Dealer' | (position, _) :: _ -> position.LHO
             match this.LatestBid with
             | None -> AwaitingBid (nextBidder, None)
             | Some (bidder, level, suit) ->
@@ -89,24 +83,22 @@ type Auction = private | Auction of dealer:Position * (Position * Bid) list // h
         | Completed contract ->failwith $"{bidder.Text} cannot bid because the auction is complete (contract is {contract})"
         | AwaitingBid (nextBidder, latestBid) ->
             if nextBidder <> bidder then failwith $"""{bidder.Text} cannot bid because the {if this.IsEmpty then "first" else "next"} bidder should be {nextBidder.Text}"""
-            let (Auction (dealer, bids)) = this
             match latestBid with
             | None ->
                 match bid with
                 | Double | Redouble -> failwith $"{bidder.Text} cannot double or redouble"
-                | _ -> Auction (dealer, (bidder, bid) :: bids)
+                | _ -> { this with Bids' = (bidder, bid) :: this.Bids' }
             | Some (level, suit, canDouble, canRedouble) ->
                 match bid with
-                | Pass -> Auction (dealer, (bidder, bid) :: bids)
+                | Pass -> { this with Bids' = (bidder, bid) :: this.Bids' }
                 | Bid (level', suit') ->
                     if level'.Rank < level.Rank || (level'.Rank = level.Rank && suit'.Rank <= suit.Rank) then failwith $"{bidder.Text}'s bid must be higher than {level.ShortText}{suit.ShortText}"
-                    Auction (dealer, (bidder, bid) :: bids)
+                    { this with Bids' = (bidder, bid) :: this.Bids' }
                 | Double ->
                     if not canDouble then failwith $"{bidder.Text} cannot double"
-                    Auction (dealer, (bidder, bid) :: bids)
+                    { this with Bids' = (bidder, bid) :: this.Bids' }
                 | Redouble ->
                     if not canRedouble then failwith $"{bidder.Text} cannot redouble"
-                    Auction (dealer, (bidder, bid) :: bids)
-    member this.OrderedBids =
-        let (Auction (_, bids)) = this
-        bids |> List.rev
+                    { this with Bids' = (bidder, bid) :: this.Bids' }
+    member this.Dealer = this.Dealer'
+    member this.Bids = this.Bids' |> List.rev
