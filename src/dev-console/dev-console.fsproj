@@ -7,8 +7,12 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup> <!-- Compile -->
-        <Compile Include="..\common\domain.fs" />
+        <Compile Include="..\common\mathy.fs" />
         <Compile Include="..\common\sourced-logger.fs" />
+        <Compile Include="..\domain\core.fs" />
+        <Compile Include="..\domain\auction.fs" />
+        <Compile Include="..\domain\deal.fs" />
+        <Compile Include="..\domain\shape.fs" />
         <Compile Include="console.fs" />
         <Compile Include="program.fs" />
     </ItemGroup>

@@ -24,5 +24,5 @@ _[build.fsx](https://github.com/aornota/gibet/blob/master/build.fsx)_)
     - _dotnet tool restore_
     - _dotnet paket install_
 - Build targets:
-    - Run the dev-console (debug): _dotnet fake build --t run-dev-console_ (or just _fake build_)
+    - Run the dev-console (debug): _dotnet fake build --t run-dev-console_ (or just _dotnet fake build_)
     - Help (lists key targets): _dotnet fake build -t help_
