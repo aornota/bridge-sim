@@ -36,7 +36,6 @@ type Auction = private {
     Bids' : (Position * Bid) list (* head is latest bid *) }
     with
     static member Make(dealer) = { Dealer' = dealer; Bids' = [] }
-    member private this.IsEmpty = match this.Bids' with | [] -> true | _ -> false
     member private this.LatestBid =
         match this.Bids' |> List.choose (fun (bidder, bid) -> match bid with | Bid (level, suit) -> Some (bidder, level, suit) | _ -> None) with
         | [] -> None
@@ -52,12 +51,8 @@ type Auction = private {
         | None, 4 -> Some PassedOut
         | Some (bidder, level, suit), 3 ->
             let declarer =
-                let sameSuitAndPartnership =
-                    this.Bids'
-                    |> List.rev
-                    |> List.filter (fun (position, bid') -> match bid' with | Bid (_, suit') -> suit' = suit && not (position.IsOpponent(bidder)) | _ -> false)
-                match sameSuitAndPartnership with
-                | [] -> failwith $"SHOULD NEVER HAPPEN -> Unable to ascetion who first bid {suit.ShortText} (out of {bidder.Text} and {bidder.Partner.Text})"
+                match this.Bids' |> List.rev |> List.filter (fun (position, bid') -> match bid' with | Bid (_, suit') -> suit' = suit && not (position.IsOpponent(bidder)) | _ -> false) with
+                | [] -> failwith $"SHOULD NEVER HAPPEN -> Unable to ascetion who first bid {suit.TextPlural} (out of {bidder.Text} and {bidder.Partner.Text})"
                 | (position, _) :: _ -> position
             let stakes =
                 match this.DoubledBy.IsSome, this.RedoubledBy.IsSome with
@@ -82,7 +77,7 @@ type Auction = private {
         match this.State with
         | Completed contract ->failwith $"{bidder.Text} cannot bid because the auction is complete (contract is {contract})"
         | AwaitingBid (nextBidder, latestBid) ->
-            if nextBidder <> bidder then failwith $"""{bidder.Text} cannot bid because the {if this.IsEmpty then "first" else "next"} bidder should be {nextBidder.Text}"""
+            if nextBidder <> bidder then failwith $"""{bidder.Text} cannot bid because the {match this.Bids' with | [] -> "first" | _ -> "next"} bidder should be {nextBidder.Text}"""
             match latestBid with
             | None ->
                 match bid with

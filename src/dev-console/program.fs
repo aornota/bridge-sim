@@ -40,13 +40,13 @@ let private debugOrRelease =
 //let rec private findSrcDir (currentDir:DirectoryInfo) = if currentDir.Name = "src" then currentDir.FullName else findSrcDir currentDir.Parent
 
 let private mainAsync () = async {
-    writeNewLine "Running " ConsoleColor.Yellow
-    write debugOrRelease ConsoleColor.DarkYellow
-    write $" {SOURCE}.mainAsync\n" ConsoleColor.Yellow
-
     try
-        writeNewLine "Testing Auction behaviour:\n\n" ConsoleColor.Magenta
+        writeNewLine "Running " ConsoleColor.Yellow
+        write debugOrRelease ConsoleColor.DarkYellow
+        write $" {SOURCE}.mainAsync\n" ConsoleColor.Yellow
 
+        (* Auction stuff... *)
+        writeNewLine "Testing Auction behaviour:\n\n" ConsoleColor.Magenta
         let auction = Auction.Make(East)
         let auction = auction.Bid(East, Pass)
         let auction = auction.Bid(South, Bid (OneLevel, NoTrump)) // 12-14 balanced
@@ -59,13 +59,11 @@ let private mainAsync () = async {
         let auction = auction.Bid(East, Pass)
         let auction = auction.Bid(South, Pass) // doubleton spades
         let auction = auction.Bid(West, Pass)
-
         auction.Bids |> List.iter (fun (position, bid) -> write $"\t{position.ShortText} -> {bid.ShortText}\n" ConsoleColor.DarkCyan)
-
         match auction.State with
-        | Completed contract -> writeNewLine $"\n\tAuction completed -> contract is {contract.ShortText}" ConsoleColor.Cyan
-        | AwaitingBid (position, _) -> writeNewLine $"\n\tAwaiting bid from {position.Text}" ConsoleColor.Cyan
-        (* Auction stuff... *)
+        | Completed contract -> writeNewLine $"\tAuction completed -> contract is {contract.ShortText}" ConsoleColor.Cyan
+        | AwaitingBid (position, _) -> writeNewLine $"\tAuction in progress -> awaiting bid from {position.Text}" ConsoleColor.Cyan
+
     with | exn -> sourcedLogger.Error("Unexpected error:\n\t{errorMessage}", exn.Message)
 
     writeNewLine "\nPress any key to exit..." ConsoleColor.Yellow
