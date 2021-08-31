@@ -5,7 +5,7 @@ open Aornota.BridgeSim.Domain.Core
 type Level = | OneLevel | TwoLevel | ThreeLevel | FourLevel | FiveLevel | SixLevel | SevenLevel
     with
     member this.Rank = match this with | OneLevel -> 1 | TwoLevel -> 2 | ThreeLevel -> 3 | FourLevel -> 4 | FiveLevel -> 5 | SixLevel -> 6 | SevenLevel -> 7
-    member this.TricksRequired = this.Rank + 6
+    member this.TricksRequired = (uint this.Rank) + 6u
     member this.Text = match this with | OneLevel -> "One" | TwoLevel -> "Two" | ThreeLevel -> "Three" | FourLevel -> "Four" | FiveLevel -> "Five" | SixLevel -> "Six" | SevenLevel -> "Seven"
     member this.ShortText = $"{this.Rank}"
 
@@ -28,13 +28,6 @@ type Stakes = Undoubled | Doubled | Redoubled
 
 type Contract = | Contract of Level * Strain * Stakes * declarer:Position | PassedOut
     with
-    member this.Score(vulnerability:Vulnerabilty, tricksTaken:int) =
-        match this with
-        | Contract (level, strain, stakes, _) ->
-            // TODO-NMB: Implement duplicate scoring...
-
-            0 // TEMP-NMB
-        | PassedOut -> 0
     member this.ShortText = match this with | Contract (level, strain, stakes, declarer) -> $"{level.ShortText}{strain.ShortText}{stakes.ShortText} by {declarer.Text}" | PassedOut -> "Passed out"
 
 type AuctionState = | Completed of Contract | AwaitingBid of Position * (Level * Strain * bool * bool) option

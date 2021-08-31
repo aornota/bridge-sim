@@ -73,4 +73,3 @@ type Deal = private {
     member this.AuctionState = this.Auction'.State
     member this.Bids = this.Auction'.Bids
     member this.Bid(bidder, bid) = { this with Auction' = this.Auction'.Bid(bidder, bid) }
-    // TODO-NMB: "Diagram"?...

@@ -17,6 +17,8 @@ type Rank = | Ace | King | Queen | Jack | Ten | Nine | Eight | Seven | Six | Fiv
 
 type Suit = | Spade | Heart | Diamond | Club
     with
+    member this.IsMajor = match this with | Spade | Heart -> true | Diamond | Club -> false
+    member this.IsMinor = not this.IsMajor
     member this.Rank = match this with | Spade -> 4 | Heart -> 3 | Diamond -> 2 | Club -> 1
     member this.Text = match this with | Spade -> "Spade" | Heart -> "Heart" | Diamond -> "Diamond" | Club -> "Club"
     member this.TextPlural = $"{this.Text}s"
@@ -121,10 +123,6 @@ type Hand = private { HandCards' : Set<Card> }
             let textForCards = match this.CardsForSuit(suit) with | [] -> "-" | cards -> cards |> List.map (fun card -> card.Rank.ShortText) |> String.concat ""
             $"{suit.Symbol}{textForCards}"
         $"{textForSuit Spade} {textForSuit Heart} {textForSuit Diamond} {textForSuit Club}"
-    member this.SpecificShapeText =
-        let spadeCount, heartCount, diamondCount, clubCount = this.SuitCounts
-        $"{spadeCount}={heartCount}={diamondCount}={clubCount}"
-    member this.Text = $"{this.CardsText} -- {this.ShapeCategory.TextLower} ({this.SpecificShapeText}) | {this.Hcp} HCP"
 
 type Position = | North | East | South | West
     with
