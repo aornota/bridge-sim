@@ -45,7 +45,41 @@ let private mainAsync () = async {
         write debugOrRelease ConsoleColor.DarkYellow
         write $" {SOURCE}.mainAsync\n" ConsoleColor.Yellow
 
-        (* Auction stuff... *)
+        (* Deal stuff... *)
+        writeNewLine "Testing Deal behaviour:\n\n" ConsoleColor.Magenta
+        let deal = Deal.Make(South, NotVulnerable, NotVulnerable)
+        let _, northHand = deal.SeatAndHand(North)
+        let _, eastHand = deal.SeatAndHand(East)
+        let _, southHand = deal.SeatAndHand(South)
+        let _, westHand = deal.SeatAndHand(West)
+        writeNewLine $"\tDealer -> {deal.Dealer.Text}\n" ConsoleColor.DarkCyan
+        writeNewLine $"\t{North.Text} -> {northHand.Text}\n" ConsoleColor.Cyan
+        writeNewLine $"\t{East.Text} -> {eastHand.Text}\n" ConsoleColor.Cyan
+        writeNewLine $"\t{South.Text} -> {southHand.Text}\n" ConsoleColor.Cyan
+        writeNewLine $"\t{West.Text} -> {westHand.Text}\n" ConsoleColor.Cyan
+
+        (* Deck stuff...
+        writeNewLine "Testing Deck behaviour:\n\n" ConsoleColor.Magenta
+        let deck = Deck.MakeShuffled()
+        writeNewLine $"\tShuffled deck -> {deck.Text}\n" ConsoleColor.DarkCyan
+        let firstSeatCards, deck = deck.Deal(13)
+        let firstSeatHand = Hand.Make(firstSeatCards)
+        writeNewLine $"\t{FirstSeat.ShortText} -> {firstSeatHand.Text}\n" ConsoleColor.Cyan
+        writeNewLine $"\tRemaining deck -> {deck.Text}\n" ConsoleColor.DarkCyan
+        let secondSeatCards, deck = deck.Deal(13)
+        let secondSeatHand = Hand.Make(secondSeatCards)
+        writeNewLine $"\t{SecondSeat.ShortText} -> {secondSeatHand.Text}\n" ConsoleColor.Cyan
+        writeNewLine $"\tRemaining deck -> {deck.Text}\n" ConsoleColor.DarkCyan
+        let thirdSeatCards, deck = deck.Deal(13)
+        let thirdSeatHand = Hand.Make(thirdSeatCards)
+        writeNewLine $"\t{ThirdSeat.ShortText} -> {thirdSeatHand.Text}\n" ConsoleColor.Cyan
+        writeNewLine $"\tRemaining deck -> {deck.Text}\n" ConsoleColor.DarkCyan
+        let fourthSeatCards, deck = deck.Deal(13)
+        let fourthSeatHand = Hand.Make(fourthSeatCards)
+        writeNewLine $"\t{FourthSeat.ShortText} -> {fourthSeatHand.Text}\n" ConsoleColor.Cyan
+        writeNewLine $"\tRemaining deck -> {deck.Text}\n" ConsoleColor.DarkCyan *)
+
+        (* Auction stuff...
         writeNewLine "Testing Auction behaviour:\n\n" ConsoleColor.Magenta
         let auction = Auction.Make(East)
         let auction = auction.Bid(East, Pass)
@@ -62,7 +96,7 @@ let private mainAsync () = async {
         auction.Bids |> List.iter (fun (position, bid) -> write $"\t{position.ShortText} -> {bid.ShortText}\n" ConsoleColor.DarkCyan)
         match auction.State with
         | Completed contract -> writeNewLine $"\tAuction completed -> contract is {contract.ShortText}" ConsoleColor.Cyan
-        | AwaitingBid (position, _) -> writeNewLine $"\tAuction in progress -> awaiting bid from {position.Text}" ConsoleColor.Cyan
+        | AwaitingBid (position, _) -> writeNewLine $"\tAuction in progress -> awaiting bid from {position.Text}" ConsoleColor.Cyan *)
 
     with | exn -> sourcedLogger.Error("Unexpected error:\n\t{errorMessage}", exn.Message)
 
