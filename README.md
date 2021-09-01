@@ -1,4 +1,4 @@
-# ![bridge-sim](https://raw.githubusercontent.com/aornota/bridge/master/src/resources/tpoc-32x32.png) | bridge-sim (pre-_α_)
+# ![bridge-sim](https://raw.githubusercontent.com/aornota/bridge-sim/master/src/resources/tpoc-32x32.png) | bridge-sim (pre-_α_)
 
 _Work-in-progress on Bridge simulations (double-dummy analysis &c.)..._
 
