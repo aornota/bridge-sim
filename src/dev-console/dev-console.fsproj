@@ -12,9 +12,11 @@
         <Compile Include="..\domain\core.fs" />
         <Compile Include="..\domain\auction.fs" />
         <Compile Include="..\domain\deal.fs" />
-        <Compile Include="..\domain-extensions\core.fs" />
-        <Compile Include="..\domain-extensions\auction.fs" />
-        <Compile Include="..\domain-extensions\deal.fs" />
+        <Compile Include="..\domain\evaluation\core.fs" />
+        <Compile Include="..\domain\formatting\core.fs" />
+        <Compile Include="..\domain\formatting\auction.fs" />
+        <Compile Include="..\domain\formatting\deal.fs" />
+        <Compile Include="..\domain\scoring\auction.fs" />
         <Compile Include="console.fs" />
         <Compile Include="program.fs" />
     </ItemGroup>

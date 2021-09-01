@@ -5,9 +5,10 @@ open Aornota.BridgeSim.DevConsole.Console
 open Aornota.BridgeSim.Domain.Auction
 open Aornota.BridgeSim.Domain.Core
 open Aornota.BridgeSim.Domain.Deal
-open Aornota.BridgeSim.Domain.Extensions.Auction
-open Aornota.BridgeSim.Domain.Extensions.Core
-open Aornota.BridgeSim.Domain.Extensions.Deal
+open Aornota.BridgeSim.Domain.Formatting.Auction
+open Aornota.BridgeSim.Domain.Formatting.Core
+open Aornota.BridgeSim.Domain.Formatting.Deal
+open Aornota.BridgeSim.Domain.Scoring.Auction
 
 open Giraffe.SerilogExtensions
 open Microsoft.Extensions.Configuration
@@ -52,9 +53,9 @@ let private mainAsync () = async {
 
         (* Deal (and diagram/s) stuff... *)
         writeNewLine "Testing Deal behaviour and diagram/s:\n\n" ConsoleColor.Magenta
-        let randopmDealer () = match random.Next(4) with | 0 -> North | 1 -> East | 2 -> South | 3 -> West | n -> failwith $"SHOULD NEVER HAPPEN -> random ({n}) should be between 0. 1. 2 or 3"
-        let randomVulnerability () = match random.Next(2) with | 0 -> NotVulnerable | 1 -> Vulnerable | n -> failwith $"SHOULD NEVER HAPPEN -> random ({n}) should be 0 or 1"
-        let deals = 5
+        let randopmDealer () = match random.Next(4) with | 0 -> North | 1 -> East | 2 -> South | _ -> West
+        let randomVulnerability () = match random.Next(2) with | 0 -> NotVulnerable | _ -> Vulnerable
+        let deals = 3
         for n in 1..deals do
             let deal = Deal.Make(randopmDealer (), randomVulnerability (), randomVulnerability ())
             deal.Diagram(true) |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.Cyan)
@@ -121,7 +122,8 @@ let private mainAsync () = async {
         let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Doubled, South), Vulnerable, 5u
         writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(vulnerability, tricksTaken)}" ConsoleColor.Cyan
         let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Redoubled, South), Vulnerable, 6u
-        writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(vulnerability, tricksTaken)}" ConsoleColor.Cyan *)
+        writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(vulnerability, tricksTaken)}" ConsoleColor.Cyan
+        writeBlankLine () *)
 
         (* Deck stuff...
         writeNewLine "Testing Deck behaviour:\n\n" ConsoleColor.Magenta

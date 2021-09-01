@@ -3,16 +3,18 @@ module Aornota.BridgeSim.Common.Mathy
 open System
 open System.Security.Cryptography
 
+exception CountForMeanMustNotBeZeroException
+
 type Mean<[<Measure>] 'u> = {
     Total : int<'u>
-    Count : int }
+    Count : uint }
     with
     static member Create(total, count) =
-        if count <= 0 then failwith $"{(nameof count)} must be greater than zero"
+        if count = 0u then raise CountForMeanMustNotBeZeroException
         { Total = total ; Count = count }
-    static member FromList(list) = Mean<_>.Create(list |> List.sum, list.Length)
+    static member FromList(list) = Mean<_>.Create(list |> List.sum, uint list.Length)
     static member Combine(mean1, mean2) = { Total = mean1.Total + mean2.Total ; Count = mean1.Count + mean2.Count }
-    static member Update(mean, value) = { Total = mean.Total + value ; Count = mean.Count + 1 }
+    static member Update(mean, value) = { Total = mean.Total + value ; Count = mean.Count + 1u }
     member this.Mean : float<'u> = LanguagePrimitives.FloatWithMeasure (float this.Total / float this.Count)
 
 let randoms count =

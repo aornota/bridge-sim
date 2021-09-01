@@ -1,4 +1,4 @@
-module Aornota.BridgeSim.Domain.Extensions.Auction
+module Aornota.BridgeSim.Domain.Scoring.Auction
 
 open Aornota.BridgeSim.Domain.Auction
 open Aornota.BridgeSim.Domain.Core
@@ -10,10 +10,7 @@ let [<Literal>] private MINOR_SUIT_TRICK = 20
 
 let [<Literal>] private CONTRACT_POINTS_FOR_GAME = 100
 
-type private DiagramBid = | Bid of Bid | NotApplicable | Awaiting
-
-type Contract
-    with
+type Contract with
     member this.DuplicateScore(vulnerability:Vulnerabilty, tricksTaken:uint) =
         match this with
         | Contract (level, strain, stakes, _) ->
@@ -70,28 +67,3 @@ type Contract
                 | n, Vulnerable, Redoubled -> 400 + ((n - 1) * 600)
             (contractPoints + overtrickPoints + doubledOrRedoubledBonusPoints + slamBonusPoints + gameOrPartScoreBonusPoints) - penaltyPoints
         | PassedOut -> 0
-
-let auctionDiagram (dealer, state, bids) =
-    let padRight width (text:string) = if text.Length >= width then text.Substring(0, width) else $"""{text}{String.replicate (width - text.Length) " "}"""
-    let positionHeader (position:Position) = if position = dealer then $"|{position.ShortText}|" else $" {position.ShortText}"
-    let rec lines (bids:(Position * DiagramBid) list) acc =
-        let line bids =
-            let column (_, bid) = $""" {match bid with | Bid bid -> bid.ShortText | NotApplicable -> "" | Awaiting -> "..."}"""
-            bids |> List.map (column >> padRight 6) |> String.concat ""
-        match bids.Length with | n when n > 4 -> lines (bids |> List.skip 4) (line (bids |> List.take 4) :: acc) | _ -> (line bids :: acc) |> List.rev
-    let rec addNotApplicable position acc = if position = North then acc else addNotApplicable position.RHO ((position, NotApplicable) :: acc)
-    let bids = bids |> List.map (fun (position, bid) -> position, Bid bid)
-    let bids = match state with | Completed _ -> addNotApplicable dealer bids | AwaitingBid (position, _) -> ((position, Awaiting) :: (addNotApplicable dealer bids |> List.rev)) |> List.rev
-    [
-        [ North ; East ; South; West ] |> List.map (positionHeader >> padRight 6) |> String.concat ""
-        String.replicate 24 "-"
-        yield! lines bids []
-        ""
-        match state with
-        | Completed contract -> match contract with | Contract _ -> $"Contract is {contract.ShortText}" | PassedOut -> $"Deal is {contract.ShortText}"
-        | AwaitingBid (position, _) -> $"Awaiting bid from {position.Text}"
-    ]
-
-type Auction
-    with
-    member this.Diagram = auctionDiagram (this.Dealer, this.State, this.Bids)

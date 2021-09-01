@@ -1,12 +1,29 @@
-module Aornota.BridgeSim.Domain.Extensions.Deal
+module Aornota.BridgeSim.Domain.Formatting.Deal
 
 open Aornota.BridgeSim.Domain.Core
 open Aornota.BridgeSim.Domain.Deal
-open Aornota.BridgeSim.Domain.Extensions.Auction
-open Aornota.BridgeSim.Domain.Extensions.Core
+open Aornota.BridgeSim.Domain.Evaluation.Core
+open Aornota.BridgeSim.Domain.Formatting.Auction
+open Aornota.BridgeSim.Domain.Formatting.Core
 
-type Deal
-    with
+type RelativeVulnerability with
+    member this.Text = match this with | Favourable -> "Favourable" | Equal -> "Equal" | Unfavourable -> "Unfavourable"
+
+type Vulnerabilities with
+    member this.Text = $"{NorthSouth.ShortText} {this.Vulnerability(NorthSouth).TextLower} | {EastWest.ShortText} {this.Vulnerability(EastWest).TextLower}"
+    member this.ShortText = $"{NorthSouth.ShortText} {this.Vulnerability(NorthSouth).ShortTextLower} | {EastWest.ShortText} {this.Vulnerability(EastWest).ShortTextLower}"
+    member this.SummaryText =
+        match this.Vulnerability(NorthSouth), this.Vulnerability(EastWest) with
+        | NotVulnerable, NotVulnerable -> $"Neither {Vulnerable.ShortTextLower}"
+        | NotVulnerable, Vulnerable -> $"{EastWest.ShortText} {Vulnerable.ShortTextLower}"
+        | Vulnerable, NotVulnerable -> $"{NorthSouth.ShortText} {Vulnerable.ShortTextLower}"
+        | Vulnerable, Vulnerable -> $"Both {Vulnerable.ShortTextLower}"
+
+type Seat with
+    member this.Text = match this with | FirstSeat -> "First seat" | SecondSeat -> "Second seat" | ThirdSeat -> "Third seat" | FourthSeat -> "Fourth seat"
+    member this.ShortText = match this with | FirstSeat -> "1st seat" | SecondSeat -> "2nd seat" | ThirdSeat -> "3rd seat" | FourthSeat -> "4th seat"
+
+type Deal with
     member private this.PositionText(position) = if position = this.Dealer then $"|{position.ShortText}|" else $" {position.ShortText} "
     member private this.PartnershipSummary(partnership) =
         let hand1, hand2 = match partnership with | NorthSouth -> this.Hand(North), this.Hand(South) | EastWest -> this.Hand(East), this.Hand(West)
