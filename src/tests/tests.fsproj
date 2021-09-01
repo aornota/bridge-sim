@@ -19,23 +19,11 @@
         <Compile Include="..\domain\formatting\auction.fs" />
         <Compile Include="..\domain\formatting\deal.fs" />
         <Compile Include="..\domain\scoring\auction.fs" />
-        <Compile Include="scratch\core.fs" />
-        <Compile Include="scratch\auction.fs" />
-        <Compile Include="scratch\deal.fs" />
+        <Compile Include="tests.fs" />
         <Compile Include="program.fs" />
     </ItemGroup>
     <ItemGroup> <!-- appsettings.json -->
         <Content Include="appsettings.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-    <ItemGroup Condition="'$(Configuration)'=='Debug'"> <!-- appsettings.development.json -->
-        <Content Include="appsettings.development.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-    <ItemGroup Condition="'$(Configuration)'=='Release'"> <!-- appsettings.production.json -->
-        <Content Include="appsettings.production.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>

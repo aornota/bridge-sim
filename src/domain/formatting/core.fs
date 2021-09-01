@@ -47,6 +47,6 @@ type Partnership with
     member this.Text = match this with | NorthSouth -> $"{North.Text}/{South.Text}" | EastWest -> $"{East.Text}/{West.Text}"
     member this.ShortText = match this with | NorthSouth -> $"{North.ShortText}/{South.ShortText}" | EastWest -> $"{East.ShortText}/{West.ShortText}"
 
-type Vulnerabilty with
+type Vulnerability with
     member this.TextLower = match this with | NotVulnerable -> "not vulnerable" | Vulnerable -> "vulnerable"
     member this.ShortTextLower = match this with | NotVulnerable -> "non-vul." | Vulnerable -> "vul."

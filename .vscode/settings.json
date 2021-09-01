@@ -13,5 +13,6 @@
         , "LICENSE": true
 		, "paket.lock": true
     }
+	, "FSharp.suggestGitignore": false
 	, "FSharp.suggestSdkScripts": false
 }

@@ -13,7 +13,7 @@ group build
     nuget Fake.DotNet.Cli
     nuget Fake.IO.FileSystem
 
-group dev-console
+group consoles
 
     source https://api.nuget.org/v3/index.json
     framework: net5.0
@@ -25,3 +25,11 @@ group dev-console
 	nuget Serilog
 	nuget Serilog.Settings.Configuration
 	nuget Serilog.Sinks.Console
+
+group tests
+
+    source https://api.nuget.org/v3/index.json
+    framework: net5.0
+    storage: none
+
+    nuget Expecto

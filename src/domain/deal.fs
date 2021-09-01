@@ -5,7 +5,7 @@ open Aornota.BridgeSim.Domain.Core
 
 type RelativeVulnerability = | Favourable | Equal | Unfavourable
 
-type Vulnerabilities = private { NorthSouthVulnerability' : Vulnerabilty ; EastWestVulnerability' : Vulnerabilty } with
+type Vulnerabilities = private { NorthSouthVulnerability' : Vulnerability ; EastWestVulnerability' : Vulnerability } with
     static member Make(northSouthVulnerability, eastWestVulnerability) = { NorthSouthVulnerability' = northSouthVulnerability ; EastWestVulnerability' = eastWestVulnerability }
     member this.Vulnerability(partnership) = match partnership with | NorthSouth -> this.NorthSouthVulnerability' | EastWest -> this.EastWestVulnerability'
     member this.Vulnerability(position) = this.Vulnerability(Partnership.ForPosition(position))

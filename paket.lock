@@ -645,7 +645,7 @@ NUGET
       System.Xml.XmlDocument (>= 4.3)
       System.Xml.XPath (>= 4.3)
 
-GROUP dev-console
+GROUP consoles
 STORAGE: NONE
 RESTRICTION: == net50
 NUGET
@@ -732,3 +732,14 @@ NUGET
       System.Reflection.Emit.Lightweight (>= 4.3)
       System.Threading.Tasks.Extensions (>= 4.4)
       System.ValueTuple (>= 4.4)
+
+GROUP tests
+STORAGE: NONE
+RESTRICTION: == net50
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    Expecto (9.0.4)
+      FSharp.Core (>= 4.6)
+      Mono.Cecil (>= 0.11.3)
+    FSharp.Core (5.0.2)
+    Mono.Cecil (0.11.4)

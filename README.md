@@ -1,6 +1,6 @@
 # ![bridge-sim](https://raw.githubusercontent.com/aornota/bridge/master/src/resources/tpoc-32x32.png) | bridge-sim (pre-_α_)
 
-Work-in-progress on Bridge simulations (double-dummy analysis &c.).
+_Work-in-progress on Bridge simulations (double-dummy analysis &c.)..._
 
 Uses [Double Dummy Solver](http://privat.bahnhof.se/wb758135/bridge/index.html).
 
@@ -25,4 +25,5 @@ _[build.fsx](https://github.com/aornota/gibet/blob/master/build.fsx)_)
     - _dotnet paket install_
 - Build targets:
     - Run the dev-console (debug): _dotnet fake build --t run-dev-console_ (or just _dotnet fake build_)
+    - Run the tests (Release): _fake build --t run-tests_
     - Help (lists key targets): _dotnet fake build -t help_

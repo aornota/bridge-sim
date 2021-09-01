@@ -10,10 +10,13 @@ let [<Literal>] private MINOR_SUIT_TRICK = 20
 
 let [<Literal>] private CONTRACT_POINTS_FOR_GAME = 100
 
+exception MustProvideVulnerabilityAndTricksTakenForContractException
+exception MustNotProvideVulnerabilityAndTricksTakenForPassedOutException
+
 type Contract with
-    member this.DuplicateScore(vulnerability:Vulnerabilty, tricksTaken:uint) =
-        match this with
-        | Contract (level, strain, stakes, _) ->
+    member this.DuplicateScore(vulnerabilityAndTricksTaken:(Vulnerability * uint) option) =
+        match this, vulnerabilityAndTricksTaken with
+        | Contract (level, strain, stakes, _), Some (vulnerability, tricksTaken) ->
             let perSuitTrick (suit:Suit) = if suit.IsMajor then MAJOR_SUIT_TRICK else MINOR_SUIT_TRICK
             let contractPoints =
                 match max (int (min level.TricksRequired tricksTaken) - 6) 0, strain with
@@ -66,4 +69,6 @@ type Contract with
                 | 1, Vulnerable, Redoubled -> 400
                 | n, Vulnerable, Redoubled -> 400 + ((n - 1) * 600)
             (contractPoints + overtrickPoints + doubledOrRedoubledBonusPoints + slamBonusPoints + gameOrPartScoreBonusPoints) - penaltyPoints
-        | PassedOut -> 0
+        | PassedOut, None -> 0
+        | Contract _, None -> raise MustProvideVulnerabilityAndTricksTakenForContractException
+        | PassedOut, Some _ -> raise MustNotProvideVulnerabilityAndTricksTakenForPassedOutException

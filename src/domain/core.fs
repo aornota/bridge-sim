@@ -82,4 +82,4 @@ type Partnership = NorthSouth | EastWest with
     static member ForPosition(position) = match position with North | South -> NorthSouth | East | West -> EastWest
     member this.Opposition = match this with | NorthSouth -> EastWest | EastWest -> NorthSouth
 
-type Vulnerabilty = | NotVulnerable | Vulnerable
+type Vulnerability = | NotVulnerable | Vulnerable
