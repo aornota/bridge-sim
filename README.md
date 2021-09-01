@@ -16,7 +16,7 @@ Uses [Double Dummy Solver](http://privat.bahnhof.se/wb758135/bridge/index.html).
     - [EditorConfig for VS Code](https://marketplace.visualstudio.com/items?itemName=editorconfig.editorconfig)
     - [Rainbow Brackets](https://marketplace.visualstudio.com/items?itemName=2gua.rainbow-brackets)
 - ([Microsoft .NET Framework 4.7.2 Developer Pack](https://dotnet.microsoft.com/download/dotnet-framework/net472/): this appeared to resolve problems with Intellisense in
-_[build.fsx](https://github.com/aornota/gibet/blob/master/build.fsx)_)
+_[build.fsx](https://github.com/aornota/bridge-sim/blob/master/build.fsx)_)
 
 #### Running
 
