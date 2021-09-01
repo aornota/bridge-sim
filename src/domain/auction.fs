@@ -19,7 +19,7 @@ type Strain = | Suit of Suit | NoTrump
 type Bid = | Pass | Bid of Level * Strain | Double | Redouble
     with
     member this.Text = match this with | Pass -> "Pass" | Bid (level, suit) -> $"{level.Text} {if level = OneLevel then suit.Text else suit.TextPlural}" | Double -> "Double" | Redouble -> "Redouble"
-    member this.ShortText = match this with | Pass -> "-" | Bid (level, suit) -> $"{level.ShortText}{suit.ShortText}" | Double -> "dbl" | Redouble -> "rdbl"
+    member this.ShortText = match this with | Pass -> "pass" | Bid (level, suit) -> $"{level.ShortText}{suit.ShortText}" | Double -> "dbl" | Redouble -> "rdbl"
 
 type Stakes = Undoubled | Doubled | Redoubled
     with
@@ -28,7 +28,7 @@ type Stakes = Undoubled | Doubled | Redoubled
 
 type Contract = | Contract of Level * Strain * Stakes * declarer:Position | PassedOut
     with
-    member this.ShortText = match this with | Contract (level, strain, stakes, declarer) -> $"{level.ShortText}{strain.ShortText}{stakes.ShortText} by {declarer.Text}" | PassedOut -> "Passed out"
+    member this.ShortText = match this with | Contract (level, strain, stakes, declarer) -> $"{level.ShortText}{strain.ShortText}{stakes.ShortText} by {declarer.Text}" | PassedOut -> "passed out"
 
 type AuctionState = | Completed of Contract | AwaitingBid of Position * (Level * Strain * bool * bool) option
 

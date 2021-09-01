@@ -70,6 +70,8 @@ type Deal = private {
         | North, East | East, South | South, West | West, North -> SecondSeat, this.SecondSeatHand'
         | North, South | East, West | South, North | West, East -> ThirdSeat, this.ThirdSeatHand'
         | North, West | East, North | South, East | West, South -> FourthSeat, this.FourthSeatHand'
+    member this.Hand(position) = snd (this.SeatAndHand(position))
+    member this.Seat(position) = fst (this.SeatAndHand(position))
     member this.AuctionState = this.Auction'.State
     member this.Bids = this.Auction'.Bids
     member this.Bid(bidder, bid) = { this with Auction' = this.Auction'.Bid(bidder, bid) }

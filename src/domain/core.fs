@@ -76,7 +76,8 @@ type ShapeCategory =
         | FiveFourTwoTwo | SixThreeTwoTwo -> SemiBalanced
         | FourFourFourOne | FiveFourThreeOne | FiveFourFourZero | SixThreeThreeOne | SevenTwoTwoTwo -> Unbalanced
         | _ -> VeryUnbalanced
-    member this.TextLower = match this with | Balanced -> "balanced" | SemiBalanced -> "semi-balanced" | Unbalanced -> "unbalanced" | VeryUnbalanced -> "very unbalanced"
+    member this.TextUpper = match this with | Balanced -> "Balanced" | SemiBalanced -> "Semi-balanced" | Unbalanced -> "Unbalanced" | VeryUnbalanced -> "Very unbalanced"
+    member this.TextLower = $"{this.TextUpper.Substring(0, 1).ToLowerInvariant()}{this.TextUpper.Substring(1)}"
 
 type Hand = private { HandCards' : Set<Card> }
     with
@@ -118,15 +119,14 @@ type Hand = private { HandCards' : Set<Card> }
         | [ 13 ; 0 ; 0 ; 0 ] -> ThirteenZeroZeroZero
         | _ -> failwith $"SHOULD NEVER HAPPEN -> {nameof(Hand)} has unexpected shape"
     member this.ShapeCategory = ShapeCategory.Make(this.Shape)
-    member this.CardsText =
-        let textForSuit suit =
-            let textForCards = match this.CardsForSuit(suit) with | [] -> "-" | cards -> cards |> List.map (fun card -> card.Rank.ShortText) |> String.concat ""
-            $"{suit.Symbol}{textForCards}"
-        $"{textForSuit Spade} {textForSuit Heart} {textForSuit Diamond} {textForSuit Club}"
+    member this.CardsText(suit) =
+        let textForCards = match this.CardsForSuit(suit) with | [] -> "-" | cards -> cards |> List.map (fun card -> card.Rank.ShortText) |> String.concat ""
+        $"{suit.Symbol}{textForCards}"
 
 type Position = | North | East | South | West
     with
     member this.LHO = match this with | North -> East | East -> South | South -> West | West -> North
+    member this.RHO = match this with | North -> West | East -> North | South -> East | West -> South
     member this.Partner = match this with | North -> South | East -> West | South -> North | West -> East
     member this.IsPartner(position) = this.Partner = position
     member this.IsPartnership(position) = this = position || this.IsPartner(position)
@@ -137,4 +137,4 @@ type Position = | North | East | South | West
 type Vulnerabilty = | NotVulnerable | Vulnerable
     with
     member this.TextLower = match this with | NotVulnerable -> "not vulnerable" | Vulnerable -> "vulnerable"
-    member this.ShortTextLower = match this with | NotVulnerable -> "non-vul" | Vulnerable -> "vul"
+    member this.ShortTextLower = match this with | NotVulnerable -> "non-vul." | Vulnerable -> "vul."

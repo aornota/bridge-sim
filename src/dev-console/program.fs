@@ -42,43 +42,43 @@ let private debugOrRelease =
 
 //let rec private findSrcDir (currentDir:DirectoryInfo) = if currentDir.Name = "src" then currentDir.FullName else findSrcDir currentDir.Parent
 
+let private random = Random()
+
 let private mainAsync () = async {
     try
         writeNewLine "Running " ConsoleColor.Yellow
         write debugOrRelease ConsoleColor.DarkYellow
         write $" {SOURCE}.mainAsync\n" ConsoleColor.Yellow
 
-        (* Deal stuff... *)
-        writeNewLine "Testing Deal behaviour:\n\n" ConsoleColor.Magenta
-        let deal = Deal.Make(South, NotVulnerable, NotVulnerable)
-        let _, northHand = deal.SeatAndHand(North)
-        let _, eastHand = deal.SeatAndHand(East)
-        let _, southHand = deal.SeatAndHand(South)
-        let _, westHand = deal.SeatAndHand(West)
-        writeNewLine $"\tDealer -> {deal.Dealer.Text}\n" ConsoleColor.DarkCyan
-        writeNewLine $"\t{North.Text} -> {northHand.Text}\n" ConsoleColor.Cyan
-        writeNewLine $"\t{East.Text} -> {eastHand.Text}\n" ConsoleColor.Cyan
-        writeNewLine $"\t{South.Text} -> {southHand.Text}\n" ConsoleColor.Cyan
-        writeNewLine $"\t{West.Text} -> {westHand.Text}\n" ConsoleColor.Cyan
+        (* Deal (and diagram/s) stuff... *)
+        writeNewLine "Testing Deal behaviour and diagram/s:\n\n" ConsoleColor.Magenta
+        let randopmDealer () = match random.Next(4) with | 0 -> North | 1 -> East | 2 -> South | 3 -> West | n -> failwith $"SHOULD NEVER HAPPEN -> random ({n}) should be between 0. 1. 2 or 3"
+        let randomVulnerability () = match random.Next(2) with | 0 -> NotVulnerable | 1 -> Vulnerable | n -> failwith $"SHOULD NEVER HAPPEN -> random ({n}) should be 0 or 1"
+        let deals = 5
+        for n in 1..deals do
+            let deal = Deal.Make(randopmDealer (), randomVulnerability (), randomVulnerability ())
+            deal.Diagram(true) |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.Cyan)
+            //deal.Summary(true) |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.DarkCyan)
+            if n < deals then writeNewLine "\t-----\n\n" ConsoleColor.DarkMagenta
 
-        (* Auction stuff...
-        writeNewLine "Testing Auction behaviour:\n\n" ConsoleColor.Magenta
+        (* Auction (and diagram) stuff...
+        writeNewLine "Testing Auction behaviour and diagram:\n\n" ConsoleColor.Magenta
         let auction = Auction.Make(East)
         let auction = auction.Bid(East, Pass)
         let auction = auction.Bid(South, Bid (OneLevel, NoTrump)) // 12-14 balanced
         let auction = auction.Bid(West, Pass)
         let auction = auction.Bid(North, Bid (TwoLevel, Suit Heart)) // transfer to spades (5+ suit)
-        let auction = auction.Bid(East, Bid.Double) // showing hearts
+        let auction = auction.Bid(East, Bid.Double) // showing hearts (lead-directing?)
         let auction = auction.Bid(South, Bid (TwoLevel, Suit Spade)) // completing transfer
         let auction = auction.Bid(West, Pass)
         let auction = auction.Bid(North, Bid (ThreeLevel, NoTrump)) // offering a choice of games (pass with doubleton spades; else bid 4S)
         let auction = auction.Bid(East, Pass)
         let auction = auction.Bid(South, Pass) // doubleton spades
-        let auction = auction.Bid(West, Pass)
-        auction.Bids |> List.iter (fun (position, bid) -> write $"\t{position.ShortText} -> {bid.ShortText}\n" ConsoleColor.DarkCyan)
-        match auction.State with
-        | Completed contract -> writeNewLine $"\tAuction completed -> contract is {contract.ShortText}" ConsoleColor.Cyan
-        | AwaitingBid (position, _) -> writeNewLine $"\tAuction in progress -> awaiting bid from {position.Text}" ConsoleColor.Cyan *)
+        let auction = auction.Bid(West, Bid.Double)
+        let auction = auction.Bid(North, Pass)
+        let auction = auction.Bid(East, Pass)
+        let auction = auction.Bid(South, Pass)
+        auction.Diagram |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.Cyan) *)
 
         (* Duplicate scoring stuff...
         writeNewLine "Testing duplicate scoring:\n\n" ConsoleColor.Magenta
