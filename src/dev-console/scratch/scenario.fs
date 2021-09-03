@@ -15,6 +15,7 @@ open Thoth.Json.Net
 
 exception CannotDeserializeDealAndContractsException of json:string * error:string
 
+// TODO-NMB: Persist double-dummy results with deal (&c.)?...
 type private DealAndContracts = { Deal : Deal ; Contracts : Contract list } with
     static member FromJson json = match Decode.Auto.fromString<DealAndContracts> json with | Ok value -> value | Error error -> raise (CannotDeserializeDealAndContractsException (json, error))
     member this.ToJson = Encode.Auto.toString<DealAndContracts> (4, this)
@@ -46,10 +47,16 @@ let workInProgress (mode:Mode) =
                         let partnerSpades, partnerHearts, partnerDiamonds, partnerClubs = partnerHand.SuitCounts
                         if partnerDiamonds >= 7 || partnerClubs >= 7 then None // assume will always play in minor (or 3NT) with 7-card or better suit
                         else
+
+                            // TODO-NMB: Temporarily change more common Some(s) to None, i.e. to check that rarer cases (5[+]-5[+] &c.) are handled correctly?...
+
                             match partnerSpades, partnerHearts, openerSpades, openerHearts with
                             | _, _, _, _ when partnerSpades >= 8 || partnerHearts >= 8 -> None // assume will always play in major with 8-card or better suit
+                            // TODO-NMB: If exactly 6-4 in majors, handle as per 5-4 (but assuming correction to 4M if opener bids 3NT)?...
                             | _, _, _, _ when partnerSpades >= 6 && partnerHearts <= 4 -> None // assume will always play in spades with 6-card or better suit and fewer than 5 hearts
+                            // TODO-NMB: What if 7-4 | 7-5 | 7-6 in majors?...
                             | _, _, _, _ when partnerSpades <= 5 && partnerHearts >= 6 -> None // assume will always play in hearts with 6-card or better suit and fewer than 6 spades
+                            // TODO-NMB: Treat 1NT | 2D | 2H | 3S as 6[+]-5[+] in majors (but not necessarily longer spades)?...
                             // Transfer sequence: 1NT | 2D | 2H | 3S shows game-force with 6+ spades and 5+ hearts.
                             | _, _, _, _ when partnerSpades >= 6 && partnerHearts >= 5 && openerSpades >= 3 -> None // assume opener chooses 4S with at least 9-card fit
                             | _, _, _, _ when partnerSpades >= 6 && partnerHearts >= 5 && openerHearts >= 4 -> None // assume opener chooses 4H with at least 9-card fit
