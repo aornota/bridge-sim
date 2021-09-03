@@ -30,7 +30,7 @@ let private scenarioDir scenarioName =
     if not (Directory.Exists dir) then Directory.CreateDirectory dir |> ignore
     dir
 
-let workInProgress (mode:Mode) =
+let workInProgress (mode:Mode) count =
     let generate _ = // deals where contract will probably be 4M but opener could choose 3NT - even though 5[+]-3 (or 6[+]-2) major fit is known
         let rec check (deal:Deal) positions =
             let contract level strain position = Contract (level, strain, Undoubled, position)
@@ -98,7 +98,7 @@ let workInProgress (mode:Mode) =
         check (Deal.MakeRandom()) [ North ; East; South ; West ]
     writeNewLine "Generating deals of interest:\n\n" ConsoleColor.Magenta
     let generator = Seq.initInfinite generate |> Seq.choose (Option.map (fun (deal, contracts) -> { Deal = deal ; Contracts = contracts }))
-    let count, start = 100, DateTime.UtcNow
+    let start = DateTime.UtcNow
     generator |> Seq.take count |> Seq.iter (fun dealAndContracts ->
         if mode.Display then
             writeBlankLine ()
@@ -114,5 +114,6 @@ let workInProgress (mode:Mode) =
             Console.ReadKey () |> ignore
             writeBlankLine ()
         else write "." ConsoleColor.DarkGray)
-    let elapsed = (DateTime.UtcNow - start).TotalSeconds
-    writeNewLine $"\nGenerated {count} deal/s in {elapsed} seconds" ConsoleColor.Gray
+    if not mode.Display then
+        let elapsed = (DateTime.UtcNow - start).TotalSeconds
+        writeNewLine $"\nGenerated {count} deal/s in {elapsed} seconds" ConsoleColor.Gray

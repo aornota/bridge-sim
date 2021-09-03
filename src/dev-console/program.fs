@@ -38,7 +38,7 @@ let private mainAsync () = async {
         //Scratch.Auction.duplicateScoring ()
         //Scratch.Deal.dealAndDiagrams ()
         //Scratch.Deal.serialization ()
-        Scratch.Scenario.workInProgress Scratch.Scenario.DisplayOnly
+        Scratch.Scenario.workInProgress Scratch.Scenario.DisplayOnly 10
 
     with | exn -> sourcedLogger.Error("Unexpected error:\n\t{errorMessage}", exn.Message)
 
