@@ -27,8 +27,6 @@ do Log.Logger <- LoggerConfiguration().ReadFrom.Configuration(configuration).Des
 
 let private sourcedLogger = Log.Logger |> sourcedLogger SOURCE
 
-//let rec private findSrcDir (currentDir:DirectoryInfo) = if currentDir.Name = "src" then currentDir.FullName else findSrcDir currentDir.Parent
-
 let private mainAsync () = async {
     try
         writeNewLine "Running " ConsoleColor.Yellow
@@ -38,7 +36,9 @@ let private mainAsync () = async {
         //Scratch.Core.deck ()
         //Scratch.Auction.auctionAndDiagram ()
         //Scratch.Auction.duplicateScoring ()
-        Scratch.Deal.dealAndDiagrams ()
+        //Scratch.Deal.dealAndDiagrams ()
+        //Scratch.Deal.serialization ()
+        Scratch.Scenario.workInProgress Scratch.Scenario.DisplayOnly
 
     with | exn -> sourcedLogger.Error("Unexpected error:\n\t{errorMessage}", exn.Message)
 
