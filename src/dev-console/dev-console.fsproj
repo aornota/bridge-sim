@@ -27,6 +27,9 @@
         <Compile Include="scratch\deal.fs" />
         <Compile Include="scratch\dds.fs" />
         <Compile Include="scratch\simulation.fs" />
+        <Compile Include="scratch\scenario-5-4-major.fs" />
+        <Compile Include="scratch\scenario-6-4-major.fs" />
+        <Compile Include="scratch\scenario-2nt-invitational.fs" />
         <Compile Include="program.fs" />
     </ItemGroup>
     <ItemGroup> <!-- dds.dll -->

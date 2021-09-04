@@ -40,13 +40,15 @@ let private mainAsync () = async {
         //Scratch.Deal.serialization ()
         //Scratch.Dds.dds ()
 
-        Scratch.Simulation.runFiveFourMajorSimulation Scratch.Simulation.Minimal true 5000
-        //Scratch.Simulation.runFiveFourMajorSimulation (Scratch.Simulation.DisplayOnly true) true 10
-        //Scratch.Simulation.runFiveFourMajorSimulation Scratch.Simulation.SaveOnly true 500
+        //Scratch.Scenario.FiveFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
+        //Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.Minimal true 5000
+        //Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.SaveOnly true 500
 
-        //Scratch.Simulation.runSixFourMajorSimulation Scratch.Simulation.Minimal true 1000
-        //Scratch.Simulation.runSixFourMajorSimulation (Scratch.Simulation.DisplayOnly true) true 10
-        //Scratch.Simulation.runSixFourMajorSimulation Scratch.Simulation.SaveOnly true 500
+        //Scratch.Scenario.SixFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
+        //Scratch.Scenario.SixFourMajor.run Scratch.Simulation.Minimal true 5000
+
+        //Scratch.Scenario.TwoNtInvitational.run (Scratch.Simulation.DisplayOnly true) true 10
+        Scratch.Scenario.TwoNtInvitational.run Scratch.Simulation.Minimal true 5000
 
     with | exn -> sourcedLogger.Error("Unexpected error:\n\t{errorMessage}", exn.Message)
 
