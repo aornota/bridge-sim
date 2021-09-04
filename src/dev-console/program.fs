@@ -38,12 +38,15 @@ let private mainAsync () = async {
         //Scratch.Auction.duplicateScoring ()
         //Scratch.Deal.dealAndDiagrams ()
         //Scratch.Deal.serialization ()
-
         //Scratch.Dds.dds ()
 
-        //Scratch.Simulation.run (Scratch.Simulation.DisplayOnly true) true 10
-        Scratch.Simulation.run Scratch.Simulation.Minimal true 500
-        //Scratch.Simulation.run Scratch.Simulation.SaveOnly true 5000
+        Scratch.Simulation.runFiveFourMajorSimulation Scratch.Simulation.Minimal true 5000
+        //Scratch.Simulation.runFiveFourMajorSimulation (Scratch.Simulation.DisplayOnly true) true 10
+        //Scratch.Simulation.runFiveFourMajorSimulation Scratch.Simulation.SaveOnly true 500
+
+        //Scratch.Simulation.runSixFourMajorSimulation Scratch.Simulation.Minimal true 1000
+        //Scratch.Simulation.runSixFourMajorSimulation (Scratch.Simulation.DisplayOnly true) true 10
+        //Scratch.Simulation.runSixFourMajorSimulation Scratch.Simulation.SaveOnly true 500
 
     with | exn -> sourcedLogger.Error("Unexpected error:\n\t{errorMessage}", exn.Message)
 
