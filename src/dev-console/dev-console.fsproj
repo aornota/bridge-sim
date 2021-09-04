@@ -21,11 +21,18 @@
         <Compile Include="..\domain\formatting\auction.fs" />
         <Compile Include="..\domain\formatting\deal.fs" />
         <Compile Include="..\domain\scoring\auction.fs" />
+        <Compile Include="..\dds-interop\dds.fs" />
         <Compile Include="scratch\core.fs" />
         <Compile Include="scratch\auction.fs" />
         <Compile Include="scratch\deal.fs" />
+        <Compile Include="scratch\dds.fs" />
         <Compile Include="scratch\scenario.fs" />
         <Compile Include="program.fs" />
+    </ItemGroup>
+    <ItemGroup> <!-- dds.dll -->
+        <Content Include="..\dds-interop\dds.dll">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
     <ItemGroup> <!-- appsettings.json -->
         <Content Include="appsettings.json">
