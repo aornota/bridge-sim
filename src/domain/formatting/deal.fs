@@ -24,20 +24,20 @@ type Seat with
     member this.ShortText = match this with | FirstSeat -> "1st seat" | SecondSeat -> "2nd seat" | ThirdSeat -> "3rd seat" | FourthSeat -> "4th seat"
 
 type Deal with
-    member private this.PositionText(position) = if position = this.Dealer then $"|{position.ShortText}|" else $" {position.ShortText} "
+    member private this.PositionText(position, highlightDealer) = if highlightDealer && position = this.Dealer then $"|{position.ShortText}|" else $" {position.ShortText} "
     member private this.PartnershipSummary(partnership) =
         let hand1, hand2 = match partnership with | NorthSouth -> this.Hand(North), this.Hand(South) | EastWest -> this.Hand(East), this.Hand(West)
         let spades1, hearts1, diamonds1, clubs1 = hand1.SuitCounts
         let spades2, hearts2, diamonds2, clubs2 = hand2.SuitCounts
         let shapeText = $"{spades1 + spades2}={hearts1 + hearts2}={diamonds1 + diamonds2}={clubs1 + clubs2}"
         $"{partnership.ShortText} -> {hand1.Hcp + hand2.Hcp} HCP | {shapeText} | {this.Vulnerabilities.Vulnerability(partnership).TextLower}"
-    member this.Summary(withPartnershipSummaries) =
+    member this.Summary(highlightDealer, withPartnershipSummaries) =
         let northHand, eastHand, southHand, westHand = this.Hand(North), this.Hand(East), this.Hand(South), this.Hand(West)
         [
-            $"{this.PositionText(North)} -> {northHand.Text}"
-            $"{this.PositionText(East)} -> {eastHand.Text}"
-            $"{this.PositionText(South)} -> {southHand.Text}"
-            $"{this.PositionText(West)} -> {westHand.Text}"
+            $"{this.PositionText(North, highlightDealer)} -> {northHand.Text}"
+            $"{this.PositionText(East, highlightDealer)} -> {eastHand.Text}"
+            $"{this.PositionText(South, highlightDealer)} -> {southHand.Text}"
+            $"{this.PositionText(West, highlightDealer)} -> {westHand.Text}"
             if withPartnershipSummaries then
                 ""
                 this.PartnershipSummary(NorthSouth)
@@ -79,11 +79,11 @@ type Deal with
             northShapeText |> addSpacesLeft (westWidth + 2 + northShapeIndent)
             ""
             $"{westSpades |> addSpacesLeft westIndent |> padRight (westWidth + northSouthIndent + 15)}{eastSpades |> addSpacesLeft eastIndent}"
-            $"{westHearts |> addSpacesLeft westIndent |> padRight (westWidth + northSouthIndent+ 3)}{this.PositionText(North) |> padRight 12}{eastHearts |> addSpacesLeft eastIndent}"
+            $"{westHearts |> addSpacesLeft westIndent |> padRight (westWidth + northSouthIndent+ 3)}{this.PositionText(North, true) |> padRight 12}{eastHearts |> addSpacesLeft eastIndent}"
             $"{westDiamonds |> addSpacesLeft westIndent |> padRight (westWidth + northSouthIndent + 15)}{eastDiamonds |> addSpacesLeft eastIndent}"
-            $"{westClubs |> addSpacesLeft westIndent|> padRight ((westWidth + northSouthIndent) - 2)}{this.PositionText(West) |> padRight 10}{this.PositionText(East) |> padRight 7}{eastClubs |> addSpacesLeft eastIndent}"
+            $"{westClubs |> addSpacesLeft westIndent|> padRight ((westWidth + northSouthIndent) - 2)}{this.PositionText(West, true) |> padRight 10}{this.PositionText(East, true) |> padRight 7}{eastClubs |> addSpacesLeft eastIndent}"
             ""
-            $"{hcpText westHand |> addSpacesLeft westIndent|> padRight (westWidth + northSouthIndent + 3)}{this.PositionText(South) |> padRight 12}{hcpText eastHand |> addSpacesLeft eastIndent}"
+            $"{hcpText westHand |> addSpacesLeft westIndent|> padRight (westWidth + northSouthIndent + 3)}{this.PositionText(South, true) |> padRight 12}{hcpText eastHand |> addSpacesLeft eastIndent}"
             $"{westShapeText |> padRight (westWidth + northSouthIndent + 15)}{shapeText eastHand}"
             ""
             southSpades |> addSpacesLeft (westWidth + 2 + northSouthIndent)

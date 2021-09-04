@@ -26,7 +26,7 @@
         <Compile Include="scratch\auction.fs" />
         <Compile Include="scratch\deal.fs" />
         <Compile Include="scratch\dds.fs" />
-        <Compile Include="scratch\scenario.fs" />
+        <Compile Include="scratch\simulation.fs" />
         <Compile Include="program.fs" />
     </ItemGroup>
     <ItemGroup> <!-- dds.dll -->

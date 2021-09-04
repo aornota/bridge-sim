@@ -10,6 +10,8 @@ let [<Literal>] private MINOR_SUIT_TRICK = 20
 
 let [<Literal>] private CONTRACT_POINTS_FOR_GAME = 100
 
+type [<Measure>] score // duplicate score
+
 exception MustProvideVulnerabilityAndTricksTakenForContractException
 exception MustNotProvideVulnerabilityAndTricksTakenForPassedOutException
 
@@ -19,10 +21,10 @@ type Contract with
         | Contract (level, strain, stakes, _), Some (vulnerability, tricksTaken) ->
             let perSuitTrick (suit:Suit) = if suit.IsMajor then MAJOR_SUIT_TRICK else MINOR_SUIT_TRICK
             let contractPoints =
-                match max (int (min level.TricksRequired tricksTaken) - 6) 0, strain with
-                | 0, _ -> 0
-                | n, NoTrump -> NT_FIRST_TRICK + ((n - 1) * NT_SUBSEQUENT_TRICK)
-                | n, Suit suit -> n * perSuitTrick suit
+                match tricksTaken >= level.TricksRequired, strain with
+                | true, NoTrump -> NT_FIRST_TRICK + ((int level.TricksRequired - 7) * NT_SUBSEQUENT_TRICK)
+                | true, Suit suit -> (int level.TricksRequired - 6) * perSuitTrick suit
+                | false, _ -> 0
             let contractPoints = contractPoints * match stakes with | Undoubled -> 1 | Doubled -> 2 | Redoubled -> 4
             let overtricks = max (int tricksTaken - int level.TricksRequired) 0
             let overtrickPoints =
@@ -68,7 +70,7 @@ type Contract with
                 | n, Vulnerable, Doubled -> 200 + ((n - 1) * 300)
                 | 1, Vulnerable, Redoubled -> 400
                 | n, Vulnerable, Redoubled -> 400 + ((n - 1) * 600)
-            (contractPoints + overtrickPoints + doubledOrRedoubledBonusPoints + slamBonusPoints + gameOrPartScoreBonusPoints) - penaltyPoints
-        | PassedOut, None -> 0
+            ((contractPoints + overtrickPoints + doubledOrRedoubledBonusPoints + slamBonusPoints + gameOrPartScoreBonusPoints) - penaltyPoints) * 1<score>
+        | PassedOut, None -> 0<score>
         | Contract _, None -> raise MustProvideVulnerabilityAndTricksTakenForContractException
         | PassedOut, Some _ -> raise MustNotProvideVulnerabilityAndTricksTakenForPassedOutException

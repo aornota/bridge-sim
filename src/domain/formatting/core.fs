@@ -37,7 +37,10 @@ type Hand
     member this.SpecificShapeText =
         let spadeCount, heartCount, diamondCount, clubCount = this.SuitCounts
         $"{spadeCount}={heartCount}={diamondCount}={clubCount}"
-    member this.Text = $"{this.CardsText(Spade)} {this.CardsText(Heart)} {this.CardsText(Diamond)} {this.CardsText(Club)} -- {this.Hcp} HCP | {this.ShapeCategory.TextLower} ({this.SpecificShapeText})"
+    member this.Text =
+        let hcp = this.Hcp
+        let hcpText = if hcp < 10<hcp> then $" {hcp}" else $"{hcp}"
+        $"{this.CardsText(Spade)} {this.CardsText(Heart)} {this.CardsText(Diamond)} {this.CardsText(Club)} -- {hcpText} HCP | {this.ShapeCategory.TextLower} ({this.SpecificShapeText})"
 
 type Position with
     member this.Text = match this with | North -> "North" | East -> "East" | South -> "South" | West -> "West"

@@ -29,48 +29,54 @@ let auctionAndDiagram () =
     auction.Diagram |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.Cyan)
 
 let duplicateScoring () =
-    writeNewLine "Testing duplicate scoring:\n\n" ConsoleColor.Magenta
+    writeNewLine "Testing duplicate scoring:\n" ConsoleColor.Magenta
     let contract = PassedOut
-    writeNewLine $"{contract.ShortText} -> {contract.DuplicateScore(None)}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} -> {contract.DuplicateScore(None)}" ConsoleColor.Cyan
     writeBlankLine ()
     let contract, vulnerability, tricksTaken = Contract (TwoLevel, NoTrump, Undoubled, South), NotVulnerable, 8u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (TwoLevel, NoTrump, Doubled, South), Vulnerable, 8u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (TwoLevel, NoTrump, Undoubled, South), Vulnerable, 9u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     writeBlankLine ()
     let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Undoubled, South), NotVulnerable, 9u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Undoubled, South), Vulnerable, 9u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Undoubled, South), Vulnerable, 10u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     writeBlankLine ()
     let contract, vulnerability, tricksTaken = Contract (TwoLevel, Suit Heart, Undoubled, South), NotVulnerable, 9u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (TwoLevel, Suit Spade, Doubled, South), NotVulnerable, 8u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (OneLevel, Suit Club, Redoubled, South), Vulnerable, 10u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (FiveLevel, Suit Diamond, Undoubled, South), Vulnerable, 11u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     writeBlankLine ()
     let contract, vulnerability, tricksTaken = Contract (SixLevel, NoTrump, Undoubled, South), NotVulnerable, 12u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (SixLevel, NoTrump, Doubled, South), Vulnerable, 13u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (SevenLevel, NoTrump, Undoubled, South), Vulnerable, 13u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     writeBlankLine ()
     let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Undoubled, South), NotVulnerable, 4u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Undoubled, South), NotVulnerable, 6u
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Undoubled, South), NotVulnerable, 7u
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Undoubled, South), NotVulnerable, 8u
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Doubled, South), NotVulnerable, 4u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Redoubled, South), NotVulnerable, 4u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Doubled, South), Vulnerable, 5u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     let contract, vulnerability, tricksTaken = Contract (ThreeLevel, NoTrump, Redoubled, South), Vulnerable, 6u
-    writeNewLine $"{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
+    writeNewLine $"\t{contract.ShortText} when {vulnerability.TextLower} taking {tricksTaken} trick/s -> {contract.DuplicateScore(Some (vulnerability, tricksTaken))}" ConsoleColor.Cyan
     writeBlankLine ()

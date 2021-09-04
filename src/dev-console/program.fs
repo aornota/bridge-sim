@@ -41,9 +41,9 @@ let private mainAsync () = async {
 
         //Scratch.Dds.dds ()
 
-        Scratch.Scenario.workInProgress (Scratch.Scenario.DisplayOnly true) true 5
-        //Scratch.Scenario.workInProgress (Scratch.Scenario.DisplayAndSave false) true 5
-        //Scratch.Scenario.workInProgress Scratch.Scenario.SaveOnly true 500
+        //Scratch.Simulation.run (Scratch.Simulation.DisplayOnly true) true 10
+        Scratch.Simulation.run Scratch.Simulation.Minimal true 500
+        //Scratch.Simulation.run Scratch.Simulation.SaveOnly true 5000
 
     with | exn -> sourcedLogger.Error("Unexpected error:\n\t{errorMessage}", exn.Message)
 
