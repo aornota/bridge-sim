@@ -17,14 +17,14 @@ open Aornota.BridgeSim.Domain.Scoring.Auction
 open System
 open System.IO
 
-type private TwoNtInvitationalStrategy = | Stayman | NoStayman with
+type private NoStaymanStrategy = | Stayman | NoStayman with
     member this.Text =
         match this with
         | Stayman -> "Stayman" // Stayman, then 3NT if no major suit fit found
         | NoStayman -> "No Stayman" // just bids 3NT
 
-let private generateNoStaymanSimulation i : (int * Simulation<TwoNtInvitationalStrategy>) option = // 1NT opening where responder has 13-15 HCP balanced and at least one (exactly) 4-card majpr
-    let simulation' deal (strategyContracts:(TwoNtInvitationalStrategy * Contract) list) =
+let private generateNoStaymanSimulation i : (int * Simulation<NoStaymanStrategy>) option = // 1NT opening where responder has 13-15 HCP balanced and at least one (exactly) 4-card majpr
+    let simulation' deal (strategyContracts:(NoStaymanStrategy * Contract) list) =
         match strategyContracts |> List.groupBy fst |> List.filter (fun (_, list) -> list.Length > 1) with | [] -> () | _ -> raise MultipleContractsForOneOrMoreStrategyException
         if strategyContracts.Length <> 2 then raise NoContractForOneOrMoreStrategyException
         simulation i deal strategyContracts

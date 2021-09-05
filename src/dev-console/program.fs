@@ -48,8 +48,8 @@ let private mainAsync () = async {
         //Scratch.Scenario.SixFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.SixFourMajor.run Scratch.Simulation.Minimal true 5000
 
-        //Scratch.Scenario.NoStayman.run (Scratch.Simulation.DisplayOnly true) true 10
-        Scratch.Scenario.NoStayman.run Scratch.Simulation.Minimal true 5000
+        Scratch.Scenario.NoStayman.run (Scratch.Simulation.DisplayOnly true) true 10
+        //Scratch.Scenario.NoStayman.run Scratch.Simulation.Minimal true 5000
 
         //Scratch.Scenario.TwoNtInvitational.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.TwoNtInvitational.run Scratch.Simulation.Minimal true 5000
