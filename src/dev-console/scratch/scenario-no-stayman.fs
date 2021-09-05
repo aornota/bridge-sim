@@ -1,4 +1,4 @@
-module Aornota.BridgeSim.DevConsole.Scratch.Scenario.TwoNtInvitational
+module Aornota.BridgeSim.DevConsole.Scratch.Scenario.NoStayman
 
 open Aornota.BridgeSim.Common.Console
 open Aornota.BridgeSim.Common.Mathy
@@ -17,17 +17,16 @@ open Aornota.BridgeSim.Domain.Scoring.Auction
 open System
 open System.IO
 
-type private TwoNtInvitationalStrategy = | OldSchool | NewSchool | TooCoolForSchool with
+type private TwoNtInvitationalStrategy = | Stayman | NoStayman with
     member this.Text =
         match this with
-        | OldSchool -> "Old school (2NT invitational)" // 2NT (invitational) with 11-12; opener accepts with 14
-        | NewSchool -> "New school (2NT invitational)" // 2NT (invitational) with 11-12; opener accepts with 14, or with 13 and a 5-card suit
-        | TooCoolForSchool -> "Too cool for school (no invitations)" // pass with 11; 3NT with 12 and a 5-card (minor) suit
+        | Stayman -> "Stayman" // Stayman, then 3NT if no major suit fit found
+        | NoStayman -> "No Stayman" // just bids 3NT
 
-let private generateTwoNtInvitationalSimulation i : (int * Simulation<TwoNtInvitationalStrategy>) option = // 1NT opening where responder has 11-12 HCP balanced and no 4-card or longer major
+let private generateNoStaymanSimulation i : (int * Simulation<TwoNtInvitationalStrategy>) option = // 1NT opening where responder has 13-15 HCP balanced and at least one (exactly) 4-card majpr
     let simulation' deal (strategyContracts:(TwoNtInvitationalStrategy * Contract) list) =
         match strategyContracts |> List.groupBy fst |> List.filter (fun (_, list) -> list.Length > 1) with | [] -> () | _ -> raise MultipleContractsForOneOrMoreStrategyException
-        if strategyContracts.Length <> 3 then raise NoContractForOneOrMoreStrategyException
+        if strategyContracts.Length <> 2 then raise NoContractForOneOrMoreStrategyException
         simulation i deal strategyContracts
     let undoubledContract level strain position = Contract (level, strain, Undoubled, position)
     let rec check (deal:Deal) positions =
@@ -40,21 +39,19 @@ let private generateTwoNtInvitationalSimulation i : (int * Simulation<TwoNtInvit
                 let partnerHand = deal.Hand(position.Partner)
                 let partnerSpades, partnerHearts, _, _ = partnerHand.SuitCounts
                 match partnerHand.ShapeCategory, partnerHand.Hcp with
-                | Balanced, partnerHcp when (partnerHcp = 11<hcp> || partnerHcp = 12<hcp>) && partnerSpades < 4 && partnerHearts < 4 -> // balanced and invitational (combined strength of 23-26) with no 4-card or longer major
+                | Balanced, hcp when hcp >= 13<hcp> && hcp <= 15<hcp> && (partnerHearts = 4 || partnerSpades = 4) -> // balanced with game (but probably not slam) combined strength of 25-29 and at least one (exactly) 4-card majpr
+                    let openerSpades, openerHearts, _, _ = hand.SuitCounts
                     // Exclude deal where contract would be the same - 3MT (by opener) - for all strategies:
-                    if hcp = 14<hcp> && partnerHcp = 12<hcp> && partnerHand.Shape = FiveThreeThreeTwo then None
+                    if not ((partnerHearts = 4 && openerHearts >= 4) || (partnerSpades = 4 && openerSpades >= 4)) then None
                     else
-                        let strategyContracts = // either 2NT (by opener) or 3NT (by opener) for OldSchool and NewSchool | either 1NT (by opener) or 3NT (by opener) for TooCoolForSchool
+                        let strategyContracts = // either 4M (by opener) or 3NT (by opener) for Stayman | always 3NT (by opener) for NoStayman
                             [
-                                if hcp = 14<hcp> then
-                                    OldSchool, undoubledContract ThreeLevel NoTrump position // 1NT | 2NT | 3NT | - (opener is declarer)
-                                else OldSchool, undoubledContract TwoLevel NoTrump position // 1NT | 2NT | - (opener is declarer)
-                                if hcp = 14<hcp> || (hcp = 13<hcp> && hand.Shape = FiveThreeThreeTwo) then
-                                    NewSchool, undoubledContract ThreeLevel NoTrump position // 1NT | 2NT | 3NT | - (opener is declarer)
-                                else NewSchool, undoubledContract TwoLevel NoTrump position // 1NT | 2NT | - (opener is declarer)
-                                if partnerHcp = 12<hcp> && partnerHand.Shape = FiveThreeThreeTwo then
-                                    TooCoolForSchool, undoubledContract ThreeLevel NoTrump position // 1NT | 3NT | - (opener is declarer)
-                                else TooCoolForSchool, undoubledContract OneLevel NoTrump position // 1NT | - (opener is declareer)
+                                if partnerHearts = 4 && openerHearts >= 4 then
+                                    Stayman, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
+                                else if partnerSpades = 4 && openerSpades >= 4 then
+                                    Stayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer) or 1NT | 2C | 2H | 3NT | 4S | - (opener is declarer)
+                                else Stayman, undoubledContract ThreeLevel NoTrump position // 1NT | 3NT | - (opener is declarer)
+                                NoStayman, undoubledContract ThreeLevel NoTrump position // 1NT | 3NT | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
                 | _ -> None
@@ -63,14 +60,14 @@ let private generateTwoNtInvitationalSimulation i : (int * Simulation<TwoNtInvit
 
 let run (mode:Mode) withDoubleDummy count =
     if count = 0 then raise CountMustBeGreaterThanZeroException
-    let simulationDescription = "Weak 1NT opening where responder has 11-12 HCP balanced and no 4-card or longer major"
-    let subDir = "weak-1NT-when-responder-has-11-to-12-hcp-balanced-and-no-4-card-or-longer-major"
+    let simulationDescription = "Weak 1NT opening where responder has 13-15 HCP balanced and at least one (exactly) 4-card major"
+    let subDir = "weak-1NT-when-responder-has-13-to-15-hcp-balanced-with-at-least-one-exactly-4-card-major"
     let scenarioDir = scenarioDir subDir
     let conditionalText = if withDoubleDummy then "generating and analyzing" else "generating"
     let countText = if count = 1 then "deal" else "deals"
     writeNewLine $"{simulationDescription} -> {conditionalText} {count} matching {countText}:\n" ConsoleColor.Magenta
     if not mode.Display then writeBlankLine ()
-    let generator = Seq.initInfinite generateTwoNtInvitationalSimulation|> Seq.choose id
+    let generator = Seq.initInfinite generateNoStaymanSimulation|> Seq.choose id
     let mutable iMax = 0
     let mutable simulations = []
     let start = DateTime.UtcNow
@@ -114,16 +111,14 @@ let run (mode:Mode) withDoubleDummy count =
                     | Some (_, vulnerable), Vulnerable -> vulnerable
                     | _ -> raise NoScoreForStrategyException
                 | None -> raise NoContractForStrategyException)
-        let oldSchoolMeanNotVulnerable, oldSchoolMeanVulnerable = Mean<score>.FromList(scores OldSchool NotVulnerable), Mean<score>.FromList(scores OldSchool Vulnerable)
-        let newSchoolMeanNotVulnerable, newSchoolMeanVulnerable = Mean<score>.FromList(scores NewSchool NotVulnerable), Mean<score>.FromList(scores NewSchool Vulnerable)
-        let tooCoolForSchoolMeanNotVulnerable, tooCoolForSchoolMeanVulnerable = Mean<score>.FromList(scores TooCoolForSchool NotVulnerable), Mean<score>.FromList(scores TooCoolForSchool Vulnerable)
+        let staymanMeanNotVulnerable, staymanMeanVulnerable = Mean<score>.FromList(scores Stayman NotVulnerable), Mean<score>.FromList(scores Stayman Vulnerable)
+        let noStaymanMeanNotVulnerable, noStaymanMeanVulnerable = Mean<score>.FromList(scores NoStayman NotVulnerable), Mean<score>.FromList(scores NoStayman Vulnerable)
         if not mode.Display then writeBlankLine ()
         writeNewLine "\tMean scores per strategy:\n" ConsoleColor.DarkGray
-        writeNewLine $"\t{OldSchool.Text} -> {oldSchoolMeanNotVulnerable.Mean} (non-vul.) | {oldSchoolMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
-        writeNewLine $"\t{NewSchool.Text} -> {newSchoolMeanNotVulnerable.Mean} (non-vul.) | {newSchoolMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
-        writeNewLine $"\t{TooCoolForSchool.Text} -> {tooCoolForSchoolMeanNotVulnerable.Mean} (non-vul.) | {tooCoolForSchoolMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
+        writeNewLine $"\t{Stayman.Text} -> {staymanMeanNotVulnerable.Mean} (non-vul.) | {staymanMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
+        writeNewLine $"\t{NoStayman.Text} -> {noStaymanMeanNotVulnerable.Mean} (non-vul.) | {noStaymanMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
         writeBlankLine ()
-    // TODO-NMB: Additional analysis, e.g. how often 2NT/3NT possible for each combined HCP (23-26)?...
+    // TODO-NMB: Additional analysis, e.g. how often 6M/6NT possible for each combined HCP (25-29)?...
     let conditionalText = if withDoubleDummy then "generated and analyzed" else "generated"
     if mode.Display then writeNewLine $"{simulationDescription} -> {conditionalText} {count} matching {countText} (from {iMax} random deal/s)" ConsoleColor.DarkYellow
     else writeNewLine $"{simulationDescription} -> {conditionalText} {count} matching {countText} (from {iMax} random deal/s) in {(DateTime.UtcNow - start).TotalSeconds} seconds" ConsoleColor.DarkYellow

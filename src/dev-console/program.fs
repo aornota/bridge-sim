@@ -38,6 +38,7 @@ let private mainAsync () = async {
         //Scratch.Auction.duplicateScoring ()
         //Scratch.Deal.dealAndDiagrams ()
         //Scratch.Deal.serialization ()
+
         //Scratch.Dds.dds ()
 
         //Scratch.Scenario.FiveFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
@@ -47,8 +48,11 @@ let private mainAsync () = async {
         //Scratch.Scenario.SixFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.SixFourMajor.run Scratch.Simulation.Minimal true 5000
 
+        //Scratch.Scenario.NoStayman.run (Scratch.Simulation.DisplayOnly true) true 10
+        Scratch.Scenario.NoStayman.run Scratch.Simulation.Minimal true 5000
+
         //Scratch.Scenario.TwoNtInvitational.run (Scratch.Simulation.DisplayOnly true) true 10
-        Scratch.Scenario.TwoNtInvitational.run Scratch.Simulation.Minimal true 5000
+        //Scratch.Scenario.TwoNtInvitational.run Scratch.Simulation.Minimal true 5000
 
     with | exn -> sourcedLogger.Error("Unexpected error:\n\t{errorMessage}", exn.Message)
 

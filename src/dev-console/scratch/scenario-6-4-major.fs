@@ -17,12 +17,12 @@ open Aornota.BridgeSim.Domain.Scoring.Auction
 open System
 open System.IO
 
-// TODO-NMB: Should Stayman64 use Texas transfer after opener's 2D rebid (so opener always declarer in either 4M)?...
-type private SixFourMajorStrategy = | Stayman64 | TexasTransfer64 with
+// TODO-NMB: Should Stayman use Texas transfer after opener's 2D rebid (so opener always declarer in either 4M)?...
+type private SixFourMajorStrategy = | Stayman | TexasTransfer with
     member this.Text =
         match this with
-        | Stayman64 -> "Simple Stayman (6-4)" // Stayman | 4M over 2M | 4M (6-card) over 2D
-        | TexasTransfer64 -> "Texas transfer (6-4)" // Texas transfer | pass forced 4M
+        | Stayman -> "Simple Stayman (6-4)" // Stayman | 4M over 2M | 4M (6-card) over 2D
+        | TexasTransfer -> "Texas transfer (6-4)" // Texas transfer | pass forced 4M
 
 let private generateSixFourMajorSimulation i : (int * Simulation<SixFourMajorStrategy>) option = // 1NT opening where responder has 13-15 HCP and exactly 6-4 in the majors
     let simulation' deal (strategyContracts:(SixFourMajorStrategy * Contract) list) =
@@ -44,26 +44,26 @@ let private generateSixFourMajorSimulation i : (int * Simulation<SixFourMajorStr
                     let partnerSpades, partnerHearts, _, _ = partnerHand.SuitCounts
                     match partnerSpades, partnerHearts with
                     // Responder is 6=4...
-                    | 6, 4 when openerHearts >= 4 -> // always 4H (by opener) for Stayman64 | always 4S (by opener) for TexasTransfer64
+                    | 6, 4 when openerHearts >= 4 -> // always 4H (by opener) for Stayman | always 4S (by opener) for TexasTransfer
                         let strategyContracts =
                             [
-                                Stayman64, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
-                                TexasTransfer64, undoubledContract FourLevel (Suit Spade) position // 1NT | 4H | 4S | - (opener is declarer)
+                                Stayman, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
+                                TexasTransfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 4H | 4S | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
                     (* Exclude deal where contract would be the same for all strategies:
                     | 6, 4 when openerSpades >= 4 -> // always 4S (by opener) for all strategies
                         let strategyContracts =
                             [
-                                Stayman64, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
-                                TexasTransfer64, undoubledContract FourLevel (Suit Spade) position // 1NT | 4H | 4S | - (opener is declarer)
+                                Stayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
+                                TexasTransfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 4H | 4S | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts *)
-                    | 6, 4 when openerSpades < 4 -> // always 4S (by partner) for Stayman64 | always 4S (by opener) for TexasTransfer64
+                    | 6, 4 when openerSpades < 4 -> // always 4S (by partner) for Stayman | always 4S (by opener) for TexasTransfer
                         let strategyContracts =
                             [
-                                Stayman64, undoubledContract FourLevel (Suit Spade) position.Partner // 1NT | 2C | 2D | 4S | - (partner is declarer)
-                                TexasTransfer64, undoubledContract FourLevel (Suit Spade) position // 1NT | 4H | 4S | - (opener is declarer)
+                                Stayman, undoubledContract FourLevel (Suit Spade) position.Partner // 1NT | 2C | 2D | 4S | - (partner is declarer)
+                                TexasTransfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 4H | 4S | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
                     // Responder is 4=6...
@@ -71,22 +71,22 @@ let private generateSixFourMajorSimulation i : (int * Simulation<SixFourMajorStr
                     | 4, 6 when openerHearts >= 4 -> // always 4H (by opener) for all strategies
                         let strategyContracts =
                             [
-                                Stayman64, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
-                                TexasTransfer64, undoubledContract FourLevel (Suit Heart) position // 1NT | 4D | 4H | - (opener is declarer)
+                                Stayman, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
+                                TexasTransfer, undoubledContract FourLevel (Suit Heart) position // 1NT | 4D | 4H | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts *)
-                    | 4, 6 when openerHearts < 4 && openerSpades >= 4 -> // always 4S (by opener) for Stayman64 | always 4H (by opener) for TexasTransfer64
+                    | 4, 6 when openerHearts < 4 && openerSpades >= 4 -> // always 4S (by opener) for Stayman | always 4H (by opener) for TexasTransfer
                         let strategyContracts =
                             [
-                                Stayman64, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
-                                TexasTransfer64, undoubledContract FourLevel (Suit Heart) position // 1NT | 4D | 4H | - (opener is declarer)
+                                Stayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
+                                TexasTransfer, undoubledContract FourLevel (Suit Heart) position // 1NT | 4D | 4H | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
-                    | 4, 6 -> // always 4H (by partner) for Stayman64 | always 4H (by opener) for TexasTransfer64
+                    | 4, 6 -> // always 4H (by partner) for Stayman | always 4H (by opener) for TexasTransfer
                         let strategyContracts =
                             [
-                                Stayman64, undoubledContract FourLevel (Suit Heart) position.Partner // 1NT | 2C | 2D | 4H | - (partner is declarer)
-                                TexasTransfer64, undoubledContract FourLevel (Suit Heart) position // 1NT | 4D | 4H | - (opener is declarer)
+                                Stayman, undoubledContract FourLevel (Suit Heart) position.Partner // 1NT | 2C | 2D | 4H | - (partner is declarer)
+                                TexasTransfer, undoubledContract FourLevel (Suit Heart) position // 1NT | 4D | 4H | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
                     | _ -> None
@@ -147,12 +147,12 @@ let run (mode:Mode) withDoubleDummy count =
                     | Some (_, vulnerable), Vulnerable -> vulnerable
                     | _ -> raise NoScoreForStrategyException
                 | None -> raise NoContractForStrategyException)
-        let staymanMeanNotVulnerable, staymanMeanVulnerable = Mean<score>.FromList(scores Stayman64 NotVulnerable), Mean<score>.FromList(scores Stayman64 Vulnerable)
-        let texasTransferMeanNotVulnerable, texasTransferMeanVulnerable = Mean<score>.FromList(scores TexasTransfer64 NotVulnerable), Mean<score>.FromList(scores TexasTransfer64 Vulnerable)
+        let staymanMeanNotVulnerable, staymanMeanVulnerable = Mean<score>.FromList(scores Stayman NotVulnerable), Mean<score>.FromList(scores Stayman Vulnerable)
+        let texasTransferMeanNotVulnerable, texasTransferMeanVulnerable = Mean<score>.FromList(scores TexasTransfer NotVulnerable), Mean<score>.FromList(scores TexasTransfer Vulnerable)
         if not mode.Display then writeBlankLine ()
         writeNewLine "\tMean scores per strategy:\n" ConsoleColor.DarkGray
-        writeNewLine $"\t{Stayman64.Text} -> {staymanMeanNotVulnerable.Mean} (non-vul.) | {staymanMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
-        writeNewLine $"\t{TexasTransfer64.Text} -> {texasTransferMeanNotVulnerable.Mean} (non-vul.) | {texasTransferMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
+        writeNewLine $"\t{Stayman.Text} -> {staymanMeanNotVulnerable.Mean} (non-vul.) | {staymanMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
+        writeNewLine $"\t{TexasTransfer.Text} -> {texasTransferMeanNotVulnerable.Mean} (non-vul.) | {texasTransferMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
         writeBlankLine ()
     // TODO-NMB: Additional analysis, e.g. how often 6M/6NT possible for each combined HCP (25-29)?...
     let conditionalText = if withDoubleDummy then "generated and analyzed" else "generated"

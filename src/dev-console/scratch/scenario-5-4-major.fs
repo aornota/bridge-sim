@@ -17,12 +17,12 @@ open Aornota.BridgeSim.Domain.Scoring.Auction
 open System
 open System.IO
 
-type private FiveFourMajorStrategy = | SimpleStayman54 | ExtendedStayman54 | Transfer54 with
+type private FiveFourMajorStrategy = | SimpleStayman | ExtendedStayman | Transfer with
     member this.Text =
         match this with
-        | SimpleStayman54 -> "Simple Stayman (5-4)" // Stayman | 4M over 2M | 3NT over 2D
-        | ExtendedStayman54 -> "Extended Stayman (5-4)" // Stayman | 4M over 2M | 3M (5-card) over 2D, then 3NT (if doubleton) or 4M
-        | Transfer54 -> "Transfer-only (5-4)" // transfer (to 5-card major) | 3NT over forced 2M | correct to 4M unless doubleton
+        | SimpleStayman -> "Simple Stayman (5-4)" // Stayman | 4M over 2M | 3NT over 2D
+        | ExtendedStayman -> "Extended Stayman (5-4)" // Stayman | 4M over 2M | 3M (5-card) over 2D, then 3NT (if doubleton) or 4M
+        | Transfer -> "Transfer-only (5-4)" // transfer (to 5-card major) | 3NT over forced 2M | correct to 4M unless doubleton
 
 let private generateFiveFourMajorSimulation i : (int * Simulation<FiveFourMajorStrategy>) option = // 1NT opening where responder has 13-15 HCP and exactly 5-4 in the majors
     let simulation' deal (strategyContracts:(FiveFourMajorStrategy * Contract) list) =
@@ -44,35 +44,35 @@ let private generateFiveFourMajorSimulation i : (int * Simulation<FiveFourMajorS
                     let partnerSpades, partnerHearts, _, _ = partnerHand.SuitCounts
                     match partnerSpades, partnerHearts with
                     // Responder is 5=4...
-                    | 5, 4 when openerHearts >= 4 -> // always 4H (by opener) for SimpleStayman54 and ExtendedStayman54 | either 4S (by opener) or 3NT (by opener) for Transfer54
+                    | 5, 4 when openerHearts >= 4 -> // always 4H (by opener) for SimpleStayman and ExtendedStayman | either 4S (by opener) or 3NT (by opener) for Transfer
                         let strategyContracts =
                             [
-                                SimpleStayman54, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
-                                ExtendedStayman54, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
+                                SimpleStayman, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
+                                ExtendedStayman, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
                                 if openerSpades >= 3 then
-                                    Transfer54, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | 4S | - (opener is declarer)
-                                else Transfer54, undoubledContract ThreeLevel NoTrump position // // 1NT | 2H | 2S | 3NT | - (opener is declarer)
+                                    Transfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | 4S | - (opener is declarer)
+                                else Transfer, undoubledContract ThreeLevel NoTrump position // // 1NT | 2H | 2S | 3NT | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
                     (* Exclude deal where contract would be the same for all strategies:
                     | 5, 4 when openerSpades >= 4 -> // always 4S (by opener) for all strategies
                         let strategyContracts =
                             [
-                                SimpleStayman54, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
-                                ExtendedStayman54, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
-                                Transfer54, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | 4S | - (opener is declarer)
+                                SimpleStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
+                                ExtendedStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
+                                Transfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | 4S | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts *)
-                    | 5, 4 when openerSpades < 4 -> // always 3NT (by opener) for SimpleStayman54 | either 4S (by partner) or 3NT (by opener) for ExtendedStayman54 | either 4S (by opener) or 3NT (by opener) for Transfer54
+                    | 5, 4 when openerSpades < 4 -> // always 3NT (by opener) for SimpleStayman | either 4S (by partner) or 3NT (by opener) for ExtendedStayman | either 4S (by opener) or 3NT (by opener) for Transfer
                         let strategyContracts =
                             [
-                                SimpleStayman54, undoubledContract ThreeLevel NoTrump position // 1NT | 2C | 2D | 3NT | - (opener is declarer)
+                                SimpleStayman, undoubledContract ThreeLevel NoTrump position // 1NT | 2C | 2D | 3NT | - (opener is declarer)
                                 if openerSpades >= 3 then
-                                    ExtendedStayman54, undoubledContract FourLevel (Suit Spade) position.Partner // 1NT | 2C | 2D | 3S | 4S | - (responder is declarer)
-                                else ExtendedStayman54, undoubledContract ThreeLevel NoTrump position // // 1NT | 2C | 2D | 3S | 3NT | - (opener is declarer)
+                                    ExtendedStayman, undoubledContract FourLevel (Suit Spade) position.Partner // 1NT | 2C | 2D | 3S | 4S | - (responder is declarer)
+                                else ExtendedStayman, undoubledContract ThreeLevel NoTrump position // // 1NT | 2C | 2D | 3S | 3NT | - (opener is declarer)
                                 if openerSpades >= 3 then
-                                    Transfer54, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | 4S | - (opener is declarer)
-                                else Transfer54, undoubledContract ThreeLevel NoTrump position // // 1NT | 2H | 2S | 3NT | - (opener is declarer)
+                                    Transfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | 4S | - (opener is declarer)
+                                else Transfer, undoubledContract ThreeLevel NoTrump position // // 1NT | 2H | 2S | 3NT | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
                     // Responder is 4=5...
@@ -80,31 +80,31 @@ let private generateFiveFourMajorSimulation i : (int * Simulation<FiveFourMajorS
                     | 4, 5 when openerHearts >= 4 -> // always 4H (by opener) for all strategies
                         let strategyContracts =
                             [
-                                SimpleStayman54, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
-                                ExtendedStayman54, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
-                                Transfer54, undoubledContract FourLevel (Suit Heart) position // 1NT | 2D | 2H | 3NT | 4H | - (opener is declarer)
+                                SimpleStayman, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
+                                ExtendedStayman, undoubledContract FourLevel (Suit Heart) position // 1NT | 2C | 2H | 4H | - (opener is declarer)
+                                Transfer, undoubledContract FourLevel (Suit Heart) position // 1NT | 2D | 2H | 3NT | 4H | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts *)
-                    | 4, 5 when openerHearts < 4 && openerSpades >= 4 -> // always 4S (by opener) for SimpleStayman54 and ExtendedStayman54 | either 4H (by opener) or 3NT (by opener) for Transfer54
+                    | 4, 5 when openerHearts < 4 && openerSpades >= 4 -> // always 4S (by opener) for SimpleStayman and ExtendedStayman | either 4H (by opener) or 3NT (by opener) for Transfer
                         let strategyContracts =
                             [
-                                SimpleStayman54, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
-                                ExtendedStayman54, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
+                                SimpleStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
+                                ExtendedStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
                                 if openerHearts >= 3 then
-                                    Transfer54, undoubledContract FourLevel (Suit Heart) position // 1NT | 2D | 2H | 3NT | 4H | - (opener is declarer)
-                                else Transfer54, undoubledContract ThreeLevel NoTrump position // // 1NT | 2D | 2HN | 3NT | - (opener is declarer)
+                                    Transfer, undoubledContract FourLevel (Suit Heart) position // 1NT | 2D | 2H | 3NT | 4H | - (opener is declarer)
+                                else Transfer, undoubledContract ThreeLevel NoTrump position // // 1NT | 2D | 2HN | 3NT | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
-                    | 4, 5 -> // always 3NT (by opener) for SimpleStayman54 | either 4H (by partner) or 3NT (by opener) for ExtendedStayman54 | either 4H (by opener) or 3NT (by opener) for Transfer54
+                    | 4, 5 -> // always 3NT (by opener) for SimpleStayman | either 4H (by partner) or 3NT (by opener) for ExtendedStayman | either 4H (by opener) or 3NT (by opener) for Transfer
                         let strategyContracts =
                             [
-                                SimpleStayman54, undoubledContract ThreeLevel NoTrump position // 1NT | 2C | 2D | 3NT | - (opener is declarer)
+                                SimpleStayman, undoubledContract ThreeLevel NoTrump position // 1NT | 2C | 2D | 3NT | - (opener is declarer)
                                 if openerHearts >= 3 then
-                                    ExtendedStayman54, undoubledContract FourLevel (Suit Heart) position.Partner // 1NT | 2C | 2D | 3H | 4H | - (responder is declarer)
-                                else ExtendedStayman54, undoubledContract ThreeLevel NoTrump position // // 1NT | 2C | 2D | 3H | 3NT | - (opener is declarer)
+                                    ExtendedStayman, undoubledContract FourLevel (Suit Heart) position.Partner // 1NT | 2C | 2D | 3H | 4H | - (responder is declarer)
+                                else ExtendedStayman, undoubledContract ThreeLevel NoTrump position // // 1NT | 2C | 2D | 3H | 3NT | - (opener is declarer)
                                 if openerHearts >= 3 then
-                                    Transfer54, undoubledContract FourLevel (Suit Heart) position // 1NT | 2D | 2H | 3NT | 4H | - (opener is declarer)
-                                else Transfer54, undoubledContract ThreeLevel NoTrump position // // 1NT | 2D | 2H | 3NT | - (opener is declarer)
+                                    Transfer, undoubledContract FourLevel (Suit Heart) position // 1NT | 2D | 2H | 3NT | 4H | - (opener is declarer)
+                                else Transfer, undoubledContract ThreeLevel NoTrump position // // 1NT | 2D | 2H | 3NT | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
                     | _ -> None
@@ -165,14 +165,14 @@ let run (mode:Mode) withDoubleDummy count =
                     | Some (_, vulnerable), Vulnerable -> vulnerable
                     | _ -> raise NoScoreForStrategyException
                 | None -> raise NoContractForStrategyException)
-        let simpleStaymanMeanNotVulnerable, simpleStaymanMeanVulnerable = Mean<score>.FromList(scores SimpleStayman54 NotVulnerable), Mean<score>.FromList(scores SimpleStayman54 Vulnerable)
-        let extendedStaymanMeanNotVulnerable, extendedStaymanMeanVulnerable = Mean<score>.FromList(scores ExtendedStayman54 NotVulnerable), Mean<score>.FromList(scores ExtendedStayman54 Vulnerable)
-        let transferOnlyMeanNotVulnerable, transferOnlyMeanVulnerable = Mean<score>.FromList(scores Transfer54 NotVulnerable), Mean<score>.FromList(scores Transfer54 Vulnerable)
+        let simpleStaymanMeanNotVulnerable, simpleStaymanMeanVulnerable = Mean<score>.FromList(scores SimpleStayman NotVulnerable), Mean<score>.FromList(scores SimpleStayman Vulnerable)
+        let extendedStaymanMeanNotVulnerable, extendedStaymanMeanVulnerable = Mean<score>.FromList(scores ExtendedStayman NotVulnerable), Mean<score>.FromList(scores ExtendedStayman Vulnerable)
+        let transferMeanNotVulnerable, transferMeanVulnerable = Mean<score>.FromList(scores Transfer NotVulnerable), Mean<score>.FromList(scores Transfer Vulnerable)
         if not mode.Display then writeBlankLine ()
         writeNewLine "\tMean scores per strategy:\n" ConsoleColor.DarkGray
-        writeNewLine $"\t{SimpleStayman54.Text} -> {simpleStaymanMeanNotVulnerable.Mean} (non-vul.) | {simpleStaymanMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
-        writeNewLine $"\t{ExtendedStayman54.Text} -> {extendedStaymanMeanNotVulnerable.Mean} (non-vul.) | {extendedStaymanMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
-        writeNewLine $"\t{Transfer54.Text} -> {transferOnlyMeanNotVulnerable.Mean} (non-vul.) | {transferOnlyMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
+        writeNewLine $"\t{SimpleStayman.Text} -> {simpleStaymanMeanNotVulnerable.Mean} (non-vul.) | {simpleStaymanMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
+        writeNewLine $"\t{ExtendedStayman.Text} -> {extendedStaymanMeanNotVulnerable.Mean} (non-vul.) | {extendedStaymanMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
+        writeNewLine $"\t{Transfer.Text} -> {transferMeanNotVulnerable.Mean} (non-vul.) | {transferMeanVulnerable.Mean} (vul.)" ConsoleColor.Gray
         writeBlankLine ()
     // TODO-NMB: Additional analysis, e.g. how often 6M/6NT possible for each combined HCP (25-29)?...
     let conditionalText = if withDoubleDummy then "generated and analyzed" else "generated"

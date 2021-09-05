@@ -28,6 +28,9 @@ let writeDoubleDummyResults (results:DoubleDummyResults) =
 
 let dds () =
     writeNewLine "Testing DDS interop:\n\n" ConsoleColor.Magenta
-    let deal = Deal.MakeRandom()
-    deal.Summary(false, true) |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.Cyan)
-    writeDoubleDummyResults (calculateDoubleDummy deal)
+    let deals = 5
+    for n in 1..deals do
+        let deal = Deal.MakeRandom()
+        deal.Summary(false, true) |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.Cyan)
+        writeDoubleDummyResults (calculateDoubleDummy deal)
+        if n < deals then writeNewLine "\n\t-----\n\n" ConsoleColor.DarkMagenta
