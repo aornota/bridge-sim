@@ -12,6 +12,6 @@ let write (text:string) consoleColor =
         Console.ForegroundColor <- current)
     lock lockObj action
 
-let writeNewLine text consoleColor = write (sprintf "\n%s" text) consoleColor
+let writeNewLine text consoleColor = write $"\n{text}" consoleColor
 
 let writeBlankLine() = writeNewLine String.Empty ConsoleColor.White

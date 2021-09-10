@@ -14,8 +14,8 @@ type Strain with
     member this.ShortText = match this with | Suit suit -> suit.ShortText | NoTrump -> "NT"
 
 type Bid with
-    member this.Text = match this with | Pass -> "Pass" | Bid (level, suit) -> $"{level.Text} {if level = OneLevel then suit.Text else suit.TextPlural}" | Double -> "Double" | Redouble -> "Redouble"
-    member this.ShortText = match this with | Pass -> "pass" | Bid (level, suit) -> $"{level.ShortText}{suit.ShortText}" | Double -> "dbl" | Redouble -> "rdbl"
+    member this.Text = match this with | Pass -> "Pass" | Bid (level, strain) -> $"{level.Text} {if level = OneLevel then strain.Text else strain.TextPlural}" | Double -> "Double" | Redouble -> "Redouble"
+    member this.ShortText = match this with | Pass -> "pass" | Bid (level, strain) -> $"{level.ShortText}{strain.ShortText}" | Double -> "dbl" | Redouble -> "rdbl"
 
 type Stakes with
     member this.Text = match this with | Undoubled -> "" | Doubled -> " (doubled)" | Redoubled -> " (redoubled)"
