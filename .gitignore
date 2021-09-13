@@ -2,10 +2,10 @@
 .ionide/
 dds290-dll/
 paket-files/
+src/dds-interop/dds.dll
+src/dds-interop/dds.lib
 bin/
 logs/
 obj/
 simulations/
 appsettings.development*.json
-
-dds-interop/

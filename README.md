@@ -21,6 +21,7 @@ _[build.fsx](https://github.com/aornota/bridge-sim/blob/master/build.fsx)_)
 #### Running
 
 - Before first running:
+    - TODO-NMB: Instructions about downloading dds.dll / dds.lib and copying to src/dds-interop...
     - _dotnet tool restore_
     - _dotnet paket install_
 - Build targets:

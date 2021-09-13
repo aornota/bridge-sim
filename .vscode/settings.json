@@ -5,6 +5,7 @@
 		, ".fake/": true
 		, ".ionide/": true
         , ".paket/": true
+		, "dds290-dll/": true
 		, "paket-files/": true
 		, "src/**/bin/": true
         , "src/**/logs/": true
