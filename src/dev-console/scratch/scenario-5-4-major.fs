@@ -63,18 +63,23 @@ let private generateFiveFourMajorSimulation i : (int * Simulation<FiveFourMajorS
                                 Transfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | 4S | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts *)
-                    | 5, 4 when openerSpades < 4 -> // always 3NT (by opener) for SimpleStayman | either 4S (by partner) or 3NT (by opener) for ExtendedStayman | either 4S (by opener) or 3NT (by opener) for Transfer
+                    | 5, 4 when openerSpades = 3 -> // always 3NT (by opener) for SimpleStayman | always 4S (by partner) for ExtendedStayman | always 4S (by opener) for Transfer
                         let strategyContracts =
                             [
                                 SimpleStayman, undoubledContract ThreeLevel NoTrump position // 1NT | 2C | 2D | 3NT | - (opener is declarer)
-                                if openerSpades >= 3 then
-                                    ExtendedStayman, undoubledContract FourLevel (Suit Spade) position.Partner // 1NT | 2C | 2D | 3S | 4S | - (responder is declarer)
-                                else ExtendedStayman, undoubledContract ThreeLevel NoTrump position // // 1NT | 2C | 2D | 3S | 3NT | - (opener is declarer)
-                                if openerSpades >= 3 then
-                                    Transfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | 4S | - (opener is declarer)
-                                else Transfer, undoubledContract ThreeLevel NoTrump position // // 1NT | 2H | 2S | 3NT | - (opener is declarer)
+                                ExtendedStayman, undoubledContract FourLevel (Suit Spade) position.Partner // 1NT | 2C | 2D | 3S | 4S | - (responder is declarer)
+                                Transfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | 4S | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
+                    (* Exclude deal where contract would be the same for all strategies:
+                    | 5, 4 when openerSpades < 3 -> // always 3NT (by opener) for all strategies
+                        let strategyContracts =
+                            [
+                                SimpleStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2D | 3NT | - (opener is declarer)
+                                ExtendedStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2D | 3S | 3NT | - (opener is declarer)
+                                Transfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 2H | 2S | 3NT | - (opener is declarer)
+                            ]
+                        simulation' deal strategyContracts *)
                     // Responder is 4=5...
                     (* Exclude deal where contract would be the same for all strategies:
                     | 4, 5 when openerHearts >= 4 -> // always 4H (by opener) for all strategies
@@ -90,24 +95,29 @@ let private generateFiveFourMajorSimulation i : (int * Simulation<FiveFourMajorS
                             [
                                 SimpleStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
                                 ExtendedStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2S | 4S | - (opener is declarer)
-                                if openerHearts >= 3 then
+                                if openerHearts = 3 then
                                     Transfer, undoubledContract FourLevel (Suit Heart) position // 1NT | 2D | 2H | 3NT | 4H | - (opener is declarer)
                                 else Transfer, undoubledContract ThreeLevel NoTrump position // // 1NT | 2D | 2HN | 3NT | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
-                    | 4, 5 -> // always 3NT (by opener) for SimpleStayman | either 4H (by partner) or 3NT (by opener) for ExtendedStayman | either 4H (by opener) or 3NT (by opener) for Transfer
+                    | 4, 5 when openerHearts = 3 && openerSpades < 4 -> // always 3NT (by opener) for SimpleStayman | always 4H (by partner) for ExtendedStayman | always 4H (by opener) for Transfer
                         let strategyContracts =
                             [
                                 SimpleStayman, undoubledContract ThreeLevel NoTrump position // 1NT | 2C | 2D | 3NT | - (opener is declarer)
-                                if openerHearts >= 3 then
-                                    ExtendedStayman, undoubledContract FourLevel (Suit Heart) position.Partner // 1NT | 2C | 2D | 3H | 4H | - (responder is declarer)
-                                else ExtendedStayman, undoubledContract ThreeLevel NoTrump position // // 1NT | 2C | 2D | 3H | 3NT | - (opener is declarer)
-                                if openerHearts >= 3 then
-                                    Transfer, undoubledContract FourLevel (Suit Heart) position // 1NT | 2D | 2H | 3NT | 4H | - (opener is declarer)
-                                else Transfer, undoubledContract ThreeLevel NoTrump position // // 1NT | 2D | 2H | 3NT | - (opener is declarer)
+                                ExtendedStayman, undoubledContract FourLevel (Suit Heart) position.Partner // 1NT | 2C | 2D | 3H | 4H | - (responder is declarer)
+                                Transfer, undoubledContract FourLevel (Suit Heart) position // 1NT | 2D | 2H | 3NT | 4H | - (opener is declarer)
                             ]
                         simulation' deal strategyContracts
-                    | _ -> None
+                    (* Exclude deal where contract would be the same for all strategies:
+                    | 4, 5 when openerHearts < 3 && openerSpades < 4 -> // always 3NT (by opener) for all strategies
+                        let strategyContracts =
+                            [
+                                SimpleStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2D | 3NT | - (opener is declarer)
+                                ExtendedStayman, undoubledContract FourLevel (Suit Spade) position // 1NT | 2C | 2D | 3H | 3NT | - (opener is declarer)
+                                Transfer, undoubledContract FourLevel (Suit Spade) position // 1NT | 2D | 2H | 3NT | - (opener is declarer)
+                            ]
+                        simulation' deal strategyContracts *)
+                    | _ -> None // exclude all other deals
                 | _ -> None
             | _ -> check deal remaining
     check (Deal.MakeRandom()) [ North ; East; South ; West ]

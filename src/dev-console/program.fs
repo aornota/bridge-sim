@@ -42,13 +42,13 @@ let private mainAsync () = async {
         //Scratch.Dds.dds ()
 
         //Scratch.Scenario.FiveFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
-        //Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.Minimal true 5000
+        Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.Minimal true 5000
         //Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.SaveOnly true 500
 
         //Scratch.Scenario.SixFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.SixFourMajor.run Scratch.Simulation.Minimal true 5000
 
-        Scratch.Scenario.NoStayman.run (Scratch.Simulation.DisplayOnly true) true 10
+        //Scratch.Scenario.NoStayman.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.NoStayman.run Scratch.Simulation.Minimal true 5000
 
         //Scratch.Scenario.TwoNtInvitational.run (Scratch.Simulation.DisplayOnly true) true 10

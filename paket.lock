@@ -647,7 +647,7 @@ NUGET
 
 GROUP consoles
 STORAGE: NONE
-RESTRICTION: == net5.0
+RESTRICTION: == net50
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Fable.Core (3.2.9)
@@ -741,7 +741,7 @@ NUGET
 
 GROUP tests
 STORAGE: NONE
-RESTRICTION: == net5.0
+RESTRICTION: == net50
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Expecto (9.0.4)
