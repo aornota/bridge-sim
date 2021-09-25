@@ -36,12 +36,12 @@ let private mainAsync () = async {
         //Scratch.Core.deck ()
         //Scratch.Auction.auctionAndDiagram ()
         //Scratch.Auction.duplicateScoring ()
-        //Scratch.Deal.dealAndDiagrams ()
+        //Scratch.Deal.dealAndDiagrams 5 false
         //Scratch.Deal.serialization ()
 
-        //Scratch.Dds.dds ()
+        Scratch.Dds.dds 10 true
 
-        Scratch.Classification.run 10
+        //Scratch.Classification.run 10
 
         //Scratch.Scenario.FiveFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.Minimal true 5000

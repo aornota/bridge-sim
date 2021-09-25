@@ -1,6 +1,7 @@
 module Aornota.BridgeSim.DevConsole.Scratch.Deal
 
 open Aornota.BridgeSim.Common.Console
+open Aornota.BridgeSim.DevConsole.Common
 open Aornota.BridgeSim.Domain.Deal
 open Aornota.BridgeSim.Domain.Formatting.Deal
 open Aornota.BridgeSim.Domain.Json.Deal
@@ -8,15 +9,20 @@ open Aornota.BridgeSim.Domain.Random.Deal
 
 open System
 
-let dealAndDiagrams () =
+let dealAndDiagrams count interactive =
+    if count = 0 then raise CountMustBeGreaterThanZeroException
     writeNewLine "Testing Deal behaviour and diagram/s:\n\n" ConsoleColor.Magenta
-    let deals = 2
-    for n in 1..deals do
+    for n in 1..count do
         let deal = Deal.MakeRandom()
         deal.Diagram(true) |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.Cyan)
         writeBlankLine ()
         deal.Summary(n % 2 = 1, true) |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.DarkCyan)
-        if n < deals then writeNewLine "\t-----\n\n" ConsoleColor.DarkMagenta
+        if n < count then
+            if interactive then
+                writeNewLine "\nPress any key to continue...\n" ConsoleColor.DarkMagenta
+                Console.ReadKey () |> ignore
+                writeBlankLine ()
+            else writeNewLine "\t-----\n\n" ConsoleColor.DarkMagenta
 
 let serialization () =
     writeNewLine "Testing Deal serialization and deserialization:\n" ConsoleColor.Magenta

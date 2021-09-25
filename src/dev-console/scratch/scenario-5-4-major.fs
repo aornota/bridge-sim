@@ -3,6 +3,7 @@ module Aornota.BridgeSim.DevConsole.Scratch.Scenario.FiveFourMajor
 open Aornota.BridgeSim.Common.Console
 open Aornota.BridgeSim.Common.Mathy
 open Aornota.BridgeSim.Dds.Interop.Dds
+open Aornota.BridgeSim.DevConsole.Common
 open Aornota.BridgeSim.DevConsole.Scratch.Dds
 open Aornota.BridgeSim.DevConsole.Scratch.Simulation
 open Aornota.BridgeSim.Domain.Auction

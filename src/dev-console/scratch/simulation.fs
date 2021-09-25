@@ -13,7 +13,6 @@ open Thoth.Json.Net
 exception CannotDeserializeSimulationException of json:string * error:string
 exception MultipleContractsForOneOrMoreStrategyException
 exception NoContractForOneOrMoreStrategyException
-exception CountMustBeGreaterThanZeroException
 exception NoContractForStrategyException
 exception NoScoreForStrategyException
 

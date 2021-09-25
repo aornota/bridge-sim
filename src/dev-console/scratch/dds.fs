@@ -2,6 +2,7 @@ module Aornota.BridgeSim.DevConsole.Scratch.Dds
 
 open Aornota.BridgeSim.Common.Console
 open Aornota.BridgeSim.Dds.Interop.Dds
+open Aornota.BridgeSim.DevConsole.Common
 open Aornota.BridgeSim.Domain.Auction
 open Aornota.BridgeSim.Domain.Core
 open Aornota.BridgeSim.Domain.Deal
@@ -26,11 +27,16 @@ let writeDoubleDummyResults (results:DoubleDummyResults) =
     write $"\n\t{West.ShortText}" ConsoleColor.DarkGray
     write (forPosition West) ConsoleColor.Gray
 
-let dds () =
+let dds count interactive =
+    if count = 0 then raise CountMustBeGreaterThanZeroException
     writeNewLine "Testing DDS interop:\n\n" ConsoleColor.Magenta
-    let deals = 5
-    for n in 1..deals do
+    for n in 1..count do
         let deal = Deal.MakeRandom()
-        deal.Summary(false, true) |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.Cyan)
+        deal.Diagram(true) |> List.iter (fun line -> write $"\t{line}\n" ConsoleColor.Cyan)
         writeDoubleDummyResults (calculateDoubleDummy deal)
-        if n < deals then writeNewLine "\n\t-----\n\n" ConsoleColor.DarkMagenta
+        if n < count then
+            if interactive then
+                writeNewLine "\nPress any key to continue...\n" ConsoleColor.DarkMagenta
+                Console.ReadKey () |> ignore
+                writeBlankLine ()
+            else writeNewLine "\n\t-----\n\n" ConsoleColor.DarkMagenta
