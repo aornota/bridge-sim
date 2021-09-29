@@ -36,14 +36,14 @@ type OpenedSuitLength = ExactlyFourCards | FiveOrMoreCards with
 type OneClubOpening =
     | LongClubs of Strength
     | LongDiamonds of Strength
-    | ClubsAndDiamonds of Strength * OpenedSuitLength
+    | ClubsAndDiamonds of Strength
     | BalancedNineteenToTwentyOne
     with
     member this.Text =
         match this with
         | LongClubs strength -> $"{Club.TextLowerPlural} single-suiter (6+) with {strength.Text}"
         | LongDiamonds strength -> $"{Diamond.TextLowerPlural} single-suiter (6+) with {strength.Text}"
-        | ClubsAndDiamonds (strength, openedSuitLength) -> $"{Club.TextLowerPlural} and {Diamond.TextLowerPlural} two-suiter (at least 5-4) with {strength.Text} and {openedSuitLength.Text(Club)}"
+        | ClubsAndDiamonds strength -> $"{Club.TextLowerPlural} and {Diamond.TextLowerPlural} two-suiter (at least 5-4) with {strength.Text}"
         | BalancedNineteenToTwentyOne -> "balanced (4333, 4432 or 5322) with 19-21 HCP"
 
 type OneDiamondOpening = | BalancedTenToTwelve | BalancedSixteenToEighteen with
@@ -143,7 +143,7 @@ let private classify (hand:Hand) =
             else if clubs >= 5 || (spades >= 5 && clubs >= 4) then Some (OneSpade (SpadesAndClubs (strength hcp, openedSuitLength spades)))
             else if spades >= 6 then Some (OneSpade (LongSpades (strength hcp)))
             else raise (UnableToClassifyHandForOneLevelOpeningException hand)
-        else if (clubs >= 4 && diamonds >= 5) || (clubs >= 5 && diamonds >= 4) then Some (OneClub (ClubsAndDiamonds (strength hcp, openedSuitLength clubs)))
+        else if (clubs >= 4 && diamonds >= 5) || (clubs >= 5 && diamonds >= 4) then Some (OneClub (ClubsAndDiamonds (strength hcp)))
         else if (clubs >= 6) then Some (OneClub (LongClubs (strength hcp)))
         else if (diamonds >= 6) then Some (OneClub (LongDiamonds (strength hcp)))
         else raise (UnableToClassifyHandForOneLevelOpeningException hand)
