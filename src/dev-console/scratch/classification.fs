@@ -99,7 +99,7 @@ type OneLevelOpening = | OneClub of OneClubOpening | OneDiamond of OneDiamondOpe
 
 exception UnexpectedHcpForStrengthException of hcp:int<hcp>
 exception UnexpectedHcpForBalancedOpeningException of hcp:int<hcp>
-exception UnexpectedLengthForOpenedMajorException of length:int
+exception UnexpectedLengthForOpenedSuitException of length:int
 exception UnableToClassifyHandForOneLevelOpeningException of hand:Hand
 
 let private classify (hand:Hand) =
@@ -127,7 +127,7 @@ let private classify (hand:Hand) =
         let openedSuitLength = function
             | length when length = 4 -> ExactlyFourCards
             | length when length > 4 -> FiveOrMoreCards
-            | length -> raise (UnexpectedLengthForOpenedMajorException length)
+            | length -> raise (UnexpectedLengthForOpenedSuitException length)
         if hearts >= 4 then
             if spades >= 4 && diamonds >= 4 then Some (OneHeart (HeartsSpadesAndDiamonds (strength hcp, openedSuitLength hearts)))
             else if spades >= 4 && clubs >= 4 then Some (OneHeart (HeartsSpadesAndClubs (strength hcp, openedSuitLength hearts)))

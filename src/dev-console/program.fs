@@ -41,7 +41,7 @@ let private mainAsync () = async {
 
         //Scratch.Dds.dds 10 true
 
-        Scratch.Classification.run 1000000
+        Scratch.Classification.run 10000
 
         //Scratch.Scenario.FiveFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.Minimal true 5000
