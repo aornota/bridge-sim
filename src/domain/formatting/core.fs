@@ -16,6 +16,7 @@ type Rank with
 type Suit with
     member this.Text = match this with | Spade -> "Spade" | Heart -> "Heart" | Diamond -> "Diamond" | Club -> "Club"
     member this.TextPlural = $"{this.Text}s"
+    member this.TextLowerPlural = this.TextPlural.ToLowerInvariant()
     member this.ShortText = match this with | Spade -> "S" | Heart -> "H" | Diamond -> "D" | Club -> "C"
     member this.ShortTextLower = this.ShortText.ToLowerInvariant()
     member this.Symbol = match this with | Spade -> "♠" | Heart -> "♥" | Diamond -> "♦" | Club -> "♣"

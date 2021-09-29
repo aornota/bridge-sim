@@ -39,9 +39,9 @@ let private mainAsync () = async {
         //Scratch.Deal.dealAndDiagrams 5 false
         //Scratch.Deal.serialization ()
 
-        Scratch.Dds.dds 10 true
+        //Scratch.Dds.dds 10 true
 
-        //Scratch.Classification.run 10
+        Scratch.Classification.run 5000
 
         //Scratch.Scenario.FiveFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.Minimal true 5000

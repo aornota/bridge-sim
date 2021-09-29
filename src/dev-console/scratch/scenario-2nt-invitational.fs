@@ -71,7 +71,7 @@ let run (mode:Mode) withDoubleDummy count =
     let countText = if count = 1 then "deal" else "deals"
     writeNewLine $"{simulationDescription} -> {conditionalText} {count} matching {countText}:\n" ConsoleColor.Magenta
     if not mode.Display then writeBlankLine ()
-    let generator = Seq.initInfinite generateTwoNtInvitationalSimulation|> Seq.choose id
+    let generator = Seq.initInfinite generateTwoNtInvitationalSimulation |> Seq.choose id
     let mutable iMax = 0
     let mutable simulations = []
     let start = DateTime.UtcNow

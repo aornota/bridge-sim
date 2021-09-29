@@ -61,8 +61,6 @@ type ShapeCategory =
         | FourFourFourOne | FiveFourThreeOne | FiveFourFourZero | SixThreeThreeOne | SevenTwoTwoTwo -> Unbalanced
         | _ -> VeryUnbalanced
 
-// TODO-NMB: "Classification", e.g. OneSuiter[Major|Minor] | TwoSuiter[Majors|Minors|LongerMajor|LongerMinor] | ThreeSuiter[ShortMajor|ShortMinor] | Balanced...
-
 exception IncorrectDistinctCardCountForHandException of required:int
 
 type Hand = private { HandCards' : Set<Card> } with
