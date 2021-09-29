@@ -27,8 +27,8 @@ open System
         -- Classify...
         -- Output summary statistics, e.g. classification broken down by HCP range (or by combined HCP range? level-of-fit? &c.)... *)
 
-type Strength = ElevenToFifteen | SixteenToNineteen with
-    member this.Text = match this with | ElevenToFifteen -> "11-15 HCP" | SixteenToNineteen -> "16-19 HCP"
+type Strength = ElevenToFourteen | FifteenToNineteen with
+    member this.Text = match this with | ElevenToFourteen -> "11-14 HCP" | FifteenToNineteen -> "15-19 HCP"
 
 type OpenedSuitLength = ExactlyFourCards | FiveOrMoreCards with
     member this.Text(suit:Suit) = match this with | ExactlyFourCards -> $"exactly 4 {suit.TextLowerPlural}" | FiveOrMoreCards -> $"5+ {suit.TextLowerPlural}"
@@ -47,7 +47,7 @@ type OneClubOpening =
         | BalancedNineteenToTwentyOne -> "balanced (4333, 4432 or 5322) with 19-21 HCP"
 
 type OneDiamondOpening = | BalancedTenToTwelve | BalancedSixteenToEighteen with
-    member this.Text = match this with | BalancedTenToTwelve -> "balanced (4333, 4432 or 5322) with 10-12 HCP" | BalancedSixteenToEighteen -> "balanced (4333, 4432 or 5322) with 16-19 HCP"
+    member this.Text = match this with | BalancedTenToTwelve -> "balanced (4333, 4432 or 5322) with 10-12 HCP" | BalancedSixteenToEighteen -> "balanced (4333, 4432 or 5322) with 16-18 HCP"
 
 type OneHeartOpening =
     | LongHearts of Strength
@@ -104,8 +104,8 @@ exception UnableToClassifyHandForOneLevelOpeningException of hand:Hand
 
 let private classify (hand:Hand) =
     let strength = function
-        | hcp when hcp >= 11<hcp> && hcp <= 15<hcp> -> ElevenToFifteen
-        | hcp when hcp >= 16<hcp> && hcp <= 19<hcp> -> SixteenToNineteen
+        | hcp when hcp >= 11<hcp> && hcp <= 14<hcp> -> ElevenToFourteen
+        | hcp when hcp >= 15<hcp> && hcp <= 19<hcp> -> FifteenToNineteen
         | hcp -> raise (UnexpectedHcpForStrengthException hcp)
     let spades, hearts, diamonds, clubs = hand.SuitCounts
     match hand.ShapeCategory, hand.Hcp with
