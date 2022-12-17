@@ -35,13 +35,17 @@ type ShapeCategory with
 type Hand
     with
     member this.CardsText(suit:Suit) = $"""{suit.Symbol}{match this.CardsForSuit(suit) with | [] -> "-" | cards -> cards |> List.map (fun card -> card.Rank.ShortText) |> String.concat ""}"""
+    member this.ControlCount =
+        let acesCount = this.Cards |> Seq.sumBy(fun card -> if card.Rank = Ace then 2 else 0)
+        let kingsCount = this.Cards |> Seq.sumBy(fun card -> if card.Rank = King then 1 else 0)
+        acesCount + kingsCount
     member this.SpecificShapeText =
         let spadeCount, heartCount, diamondCount, clubCount = this.SuitCounts
         $"{spadeCount}={heartCount}={diamondCount}={clubCount}"
     member this.Text =
         let hcp = this.Hcp
         let hcpText = if hcp < 10<hcp> then $" {hcp}" else $"{hcp}"
-        $"{this.CardsText(Spade)} {this.CardsText(Heart)} {this.CardsText(Diamond)} {this.CardsText(Club)} -- {hcpText} HCP | {this.ShapeCategory.TextLower} ({this.SpecificShapeText})"
+        $"{this.CardsText(Spade)} {this.CardsText(Heart)} {this.CardsText(Diamond)} {this.CardsText(Club)} -- {hcpText} HCP | {this.ShapeCategory.TextLower} ({this.SpecificShapeText}) | CC = {this.ControlCount}"
 
 type Position with
     member this.Text = match this with | North -> "North" | East -> "East" | South -> "South" | West -> "West"

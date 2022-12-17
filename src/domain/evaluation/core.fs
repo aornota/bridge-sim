@@ -41,3 +41,21 @@ type Hand with
     member this.SpecificShapeText =
         let spadeCount, heartCount, diamondCount, clubCount = this.SuitCounts
         $"{spadeCount}={heartCount}={diamondCount}={clubCount}"
+    member this.Ltc =
+        let ltcForSuit (cards:Card list) =
+            let has rank = cards |> List.exists (fun card -> card.Rank = rank)
+            match cards with
+            | [] -> 0
+            | [ _ ] -> if has Ace then 0 else 1
+            | [ _ ; _ ] ->
+                match has Ace, has King with
+                | true, true -> 0
+                | true, false | false, true -> 1
+                | false, false -> 2
+            | _ ->
+                match has Ace, has King, has Queen with
+                | true, true, true -> 0
+                | true, true, false | true, false, true | false, true, true -> 1
+                | true, false, false | false, true, false | false, false, true -> 2
+                | false, false, false -> 3
+        ltcForSuit (this.CardsForSuit(Spade)) + ltcForSuit (this.CardsForSuit(Heart)) + ltcForSuit (this.CardsForSuit(Diamond)) + ltcForSuit (this.CardsForSuit(Club))

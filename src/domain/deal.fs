@@ -38,6 +38,15 @@ type Deal = private {
             FourthSeatHand' = Hand.Make(fourthSeatCards)
             Auction' = Auction.Make(dealer)
         }
+    static member Make(dealer, northSouthVulnerability, eastWestVulnerability, firstSeatHand, secondSeatHand, thirdSeatHand, fourthSeatHand) =
+        {
+            Vulnerabilities' = Vulnerabilities.Make(northSouthVulnerability, eastWestVulnerability)
+            FirstSeatHand' = firstSeatHand
+            SecondSeatHand' = secondSeatHand
+            ThirdSeatHand' = thirdSeatHand
+            FourthSeatHand' = fourthSeatHand
+            Auction' = Auction.Make(dealer)
+        }
     member this.Dealer = this.Auction'.Dealer
     member this.Vulnerabilities = this.Vulnerabilities'
     member this.SeatAndHand(position) =

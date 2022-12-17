@@ -1,19 +1,20 @@
 {
-    "editor.fontSize": 12
-    , "files.exclude": {
-		".config/": true
-		, ".fake/": true
-		, ".ionide/": true
-        , ".paket/": true
-		, "dds290-dll/": true
-		, "paket-files/": true
-		, "src/**/bin/": true
-        , "src/**/logs/": true
-        , "src/**/obj/": true
-        , ".editorconfig": true
-        , "LICENSE": true
-		, "paket.lock": true
-    }
-	, "FSharp.suggestGitignore": false
-	, "FSharp.suggestSdkScripts": false
+    "editor.fontSize": 12,
+    "editor.formatOnSave": false,
+    "files.exclude": {
+        ".config/": true,
+        ".fake/": true,
+        ".ionide/": true,
+        ".paket/": true,
+        "dds290-dll/": true,
+        "paket-files/": true,
+        "src/**/bin/": true,
+        "src/**/logs/": true,
+        "src/**/obj/": true,
+        ".editorconfig": true,
+        "LICENSE": true,
+        "paket.lock": true
+    },
+    "FSharp.suggestGitignore": false,
+    "FSharp.suggestSdkScripts": false
 }
