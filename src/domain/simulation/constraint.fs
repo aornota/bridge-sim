@@ -29,4 +29,4 @@ type ComparisonConstraint<'a> when 'a:comparison =
         | AtLeast min -> $">= {min}"
         | AtMost max -> $"<= {max}"
         | Between (min, max) -> $"{min}-{max}"
-        | Exactly exact -> $"= {exact}"
+        | Exactly exact -> $"exactly {exact}"

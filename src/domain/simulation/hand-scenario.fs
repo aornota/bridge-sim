@@ -22,7 +22,9 @@ type HandScenario = {
         let cardsText =
             match this.Cards with
             | [] -> None
-            | cards -> Some $"containing {cards |> cardsForSuit Spade} {cards |> cardsForSuit Heart} {cards |> cardsForSuit Diamond} {cards |> cardsForSuit Club}"
+            | cards ->
+                let preamble = if cards.Length = CARDS_PER_HAND then "exactly" else "containing"
+                Some $"{preamble} {cards |> cardsText Spade} {cards |> cardsText Heart} {cards |> cardsText Diamond} {cards |> cardsText Club}"
         let customPredicateText = this.CustomPredicate |> Option.map (fun _ -> "with custom predicate")
         let constraintsText =
             match [ hcpText; ccText; cardsText; customPredicateText ] |> List.choose id with

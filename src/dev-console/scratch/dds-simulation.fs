@@ -148,20 +148,20 @@ let wip () =
             seat FirstSeat
             hcp (Between (18<hcp>, 25<hcp>))
             cc (AtLeast 4<cc>)
-            cards [
+            (* cards [
                 Ace, Spade
                 Queen, Spade
-                Seven, Spade
-                Four, Spade
+                //Seven, Spade
+                //Four, Spade
                 King, Heart
-                Eight, Heart
-                Five, Heart
-                Three, Heart
-                Two, Heart
+                //Eight, Heart
+                //Five, Heart
+                //Three, Heart
+                //Two, Heart
                 Ace, Diamond
                 Jack, Diamond
                 King, Club
-                Queen, Club ]
-            customPredicate (fun _ -> false)
+                Queen, Club ] *)
+            //customPredicate (fun _ -> false)
         }
     writeNewLine firstSeat.Text ConsoleColor.Cyan
