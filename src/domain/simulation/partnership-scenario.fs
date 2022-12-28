@@ -21,9 +21,3 @@ type PartnershipScenario = private {
     //Cards: Card list
     CustomPredicate: (Hand * Hand -> bool) option } *)
 
-let [<Literal>] private MIN_PARTNERSHIP_HCP = 0<hcp>
-let [<Literal>] private MAX_PARTNERSHIP_HCP = 40<hcp>
-let [<Literal>] private MIN_PARTNERSHIP_CC = 0<cc>
-let [<Literal>] private MAX_PARTNERSHIP_CC = 12<cc>
-let [<Literal>] private MIN_PARTNERSHIP_SUIT = 0
-let [<Literal>] private MAX_PARTNERSHIP_SUIT = 26

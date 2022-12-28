@@ -1,4 +1,4 @@
-version 5.257.0
+version 6.2.1
 
 group build
 
@@ -16,9 +16,10 @@ group build
 group consoles
 
     source https://api.nuget.org/v3/index.json
-    framework: net5.0
+    framework: net6.0
     storage: none
 
+    nuget Expecto
 	nuget FSharp.Core
     nuget FsToolkit.ErrorHandling
     nuget Giraffe.SerilogExtensions
@@ -26,11 +27,3 @@ group consoles
 	nuget Serilog.Settings.Configuration
 	nuget Serilog.Sinks.Console
     nuget Thoth.Json.Net
-
-group tests
-
-    source https://api.nuget.org/v3/index.json
-    framework: net5.0
-    storage: none
-
-    nuget Expecto

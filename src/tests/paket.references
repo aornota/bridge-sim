@@ -1,11 +1,8 @@
 group consoles
 
+    Expecto
 	FSharp.Core
     Giraffe.SerilogExtensions
 	Serilog
     Serilog.Settings.Configuration
 	Serilog.Sinks.Console
-
-group tests
-
-    Expecto

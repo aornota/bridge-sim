@@ -17,13 +17,12 @@ type Mean<[<Measure>] 'u> = {
     static member Update(mean, value) = { Total = mean.Total + value ; Count = mean.Count + 1u }
     member this.Mean : float<'u> = LanguagePrimitives.FloatWithMeasure (float this.Total / float this.Count)
 
+let random () = RandomNumberGenerator.GetInt32(Int32.MaxValue)
+
 let randoms count =
-    use rng = new RNGCryptoServiceProvider()
-    let bytes = Array.create 4 0uy
     [
         for _ in 1..count do
-            rng.GetBytes(bytes)
-            BitConverter.ToInt32(bytes, 0)
+            random ()
     ]
 
 let normalizedRandom () = abs (float (randoms 1 |> List.head) / float Int32.MaxValue)
