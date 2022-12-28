@@ -148,8 +148,8 @@ let wip () =
     let firstSeat =
         handScenario {
             seat FirstSeat
-            hcp (Between (18<hcp>, 25<hcp>))
-            cc (AtLeast 4<cc>)
+            hcp (HandHcpConstraint.Between (18, 25))
+            cc (CcConstraint.AtLeast 4)
             (* cards [
                 Ace, Spade
                 Queen, Spade
