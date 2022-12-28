@@ -142,7 +142,7 @@ type CcConstraint =
     member this.Min = this.CcConstraint'.Min |> Option.defaultValue CcConstraint.ImplicitMin
     member this.Max = this.CcConstraint'.Max |> Option.defaultValue CcConstraint.ImplicitMax
     member this.Matches value = this.CcConstraint'.Matches value
-    member this.Text = $"{this.CcConstraint'.Text} "
+    member this.Text = $"{this.CcConstraint'.Text} CC"
 
 exception MinimumSuitLengthMustBeBetweenException of int * int * int
 exception MaximumSuitLengthMustBeBetweenException of int * int * int
@@ -175,4 +175,4 @@ type SuitConstraint =
     member this.Min = this.SuitConstraint'.Min
     member this.Max = this.SuitConstraint'.Max
     member this.Matches value = this.SuitConstraint'.Matches value
-    member this.Text = $"{this.SuitConstraint'.Text} "
+    member this.Text = $"{this.SuitConstraint'.Text}"

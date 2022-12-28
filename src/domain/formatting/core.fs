@@ -28,6 +28,20 @@ type Card with
 type Deck with
     member this.Text = fst (this.Deal(this.Count)) |> List.map (fun card -> card.ShortText) |> String.concat " "
 
+type Shape with
+    member this.Text =
+        match this with
+        | FourThreeThreeThree -> "4333" | FourFourThreeTwo -> "4432" | FourFourFourOne -> "4441"
+        | FiveThreeThreeTwo -> "5332" | FiveFourTwoTwo -> "5422" | FiveFourThreeOne -> "5431" | FiveFourFourZero -> "5440" | FiveFiveTwoOne -> "5521" | FiveFiveThreeZero -> "5530"
+        | SixThreeTwoTwo -> "6322" | SixThreeThreeOne -> "6331" | SixFourTwoOne -> "6421" | SixFourThreeZero -> "6430" | SixFiveOneOne -> "6511" | SixFiveTwoZero -> "6520" | SixSixOneZero -> "6610"
+        | SevenTwoTwoTwo -> "7222" | SevenThreeTwoOne -> "7321" | SevenThreeThreeZero -> "7330" | SevenFourOneOne -> "7411" | SevenFourTwoZero -> "7420" | SevenFiveOneZero -> "7510" | SevenSixZeroZero -> "7600"
+        | EightTwoTwoOne -> "8221" | EightThreeOneOne -> "8311" | EightThreeTwoZero -> "8320" | EightFourOneZero -> "8410" | EightFiveZeroZero -> "8500"
+        | NineTwoOneOne -> "9211" | NineTwoTwoZero -> "9220" | NineThreeOneZero -> "9310" | NineFourZeroZero -> "9400"
+        | TenOneOneOne -> "(10)111" | TenTwoOneZero -> "(10)210" | TenThreeZeroZero -> "(10)300"
+        | ElevenOneOneZero -> "(11)110" | ElevenTwoZeroZero -> "(11)200"
+        | TwelveOneZeroZero -> "(12)100"
+        | ThirteenZeroZeroZero -> "(13)000"
+
 type ShapeCategory with
     member this.TextUpper = match this with | Balanced -> "Balanced" | SemiBalanced -> "Semi-balanced" | Unbalanced -> "Unbalanced" | VeryUnbalanced -> "Very unbalanced"
     member this.TextLower = $"{this.TextUpper.Substring(0, 1).ToLowerInvariant()}{this.TextUpper.Substring(1)}"

@@ -150,6 +150,10 @@ let wip () =
             seat FirstSeat
             hcp (HandHcpConstraint.Between (18, 25))
             cc (CcConstraint.AtLeast 4)
+            //shape (ShapeConstraint.ShapeCategories [ Balanced; SemiBalanced ])
+            //shape (ShapeConstraint.Shapes [ EightTwoTwoOne; EightThreeOneOne; EightThreeTwoZero; EightFourOneZero; EightFiveZeroZero ])
+            shape (ShapeConstraint.SuitCounts [ (4, 1, 4, 4); (5, 0, 4, 4); (4, 0, 5, 4); (4, 0, 4, 5) ])
+            //shape (ShapeConstraint.SuitConstraints (Some (SuitConstraint.AtLeast 5), Some (SuitConstraint.AtMost 2), Some (SuitConstraint.Between (1, 3)), Some (SuitConstraint.Exactly 3)))
             (* cards [
                 Ace, Spade
                 Queen, Spade
