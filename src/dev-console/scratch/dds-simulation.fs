@@ -11,8 +11,10 @@ open Aornota.BridgeSim.Domain.Formatting.Auction
 open Aornota.BridgeSim.Domain.Formatting.Core
 open Aornota.BridgeSim.Domain.Formatting.Deal
 open Aornota.BridgeSim.Domain.Random.Deal
-open Aornota.BridgeSim.Domain.Simulation.Constraint
+open Aornota.BridgeSim.Domain.Simulation.ComparisonConstraint
 open Aornota.BridgeSim.Domain.Simulation.HandScenario
+open Aornota.BridgeSim.Domain.Simulation.PartnershipScenario
+open Aornota.BridgeSim.Domain.Simulation.Scenario
 
 open System
 

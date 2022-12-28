@@ -50,6 +50,28 @@ type Shape =
     | ElevenOneOneZero | ElevenTwoZeroZero // longest suit is eleven cards
     | TwelveOneZeroZero // longest suit is twelve cards
     | ThirteenZeroZeroZero // longest suit is thirteen cards
+    with
+    member this.MinAny =
+        match this with
+        | FourThreeThreeThree -> 3
+        | FourFourThreeTwo | FiveThreeThreeTwo | FiveFourTwoTwo | SixThreeTwoTwo | SevenTwoTwoTwo -> 2
+        | FourFourFourOne | FiveFourThreeOne | FiveFiveTwoOne | SixThreeThreeOne | SixFourTwoOne | SixFiveOneOne | SevenThreeTwoOne | SevenFourOneOne | EightTwoTwoOne | EightThreeOneOne
+        | NineTwoOneOne| TenOneOneOne  -> 1
+        | FiveFourFourZero | FiveFiveThreeZero | SixFourThreeZero | SixFiveTwoZero | SixSixOneZero | SevenThreeThreeZero | SevenFourTwoZero | SevenFiveOneZero | SevenSixZeroZero
+        | EightThreeTwoZero | EightFourOneZero | EightFiveZeroZero | NineTwoTwoZero | NineThreeOneZero | NineFourZeroZero | TenTwoOneZero | TenThreeZeroZero
+        | ElevenOneOneZero | ElevenTwoZeroZero | TwelveOneZeroZero | ThirteenZeroZeroZero -> 0
+    member this.MaxAny =
+        match this with
+        | FourThreeThreeThree | FourFourThreeTwo | FourFourFourOne -> 4
+        | FiveThreeThreeTwo | FiveFourTwoTwo | FiveFourThreeOne | FiveFourFourZero | FiveFiveTwoOne | FiveFiveThreeZero -> 5
+        | SixThreeTwoTwo | SixThreeThreeOne | SixFourTwoOne | SixFourThreeZero | SixFiveOneOne | SixFiveTwoZero | SixSixOneZero -> 6
+        | SevenTwoTwoTwo | SevenThreeTwoOne | SevenThreeThreeZero | SevenFourOneOne | SevenFourTwoZero | SevenFiveOneZero | SevenSixZeroZero -> 7
+        | EightTwoTwoOne | EightThreeOneOne | EightThreeTwoZero | EightFourOneZero | EightFiveZeroZero -> 8
+        | NineTwoOneOne | NineTwoTwoZero | NineThreeOneZero | NineFourZeroZero -> 9
+        | TenOneOneOne | TenTwoOneZero | TenThreeZeroZero -> 10
+        | ElevenOneOneZero | ElevenTwoZeroZero -> 11
+        | TwelveOneZeroZero -> 12
+        | ThirteenZeroZeroZero -> 13
 
 type ShapeCategory =
     | Balanced // no singletons or voids and at most one doubleton
@@ -62,9 +84,11 @@ type ShapeCategory =
         | FiveFourTwoTwo | SixThreeTwoTwo -> SemiBalanced
         | FourFourFourOne | FiveFourThreeOne | FiveFourFourZero | SixThreeThreeOne | SevenTwoTwoTwo -> Unbalanced
         | _ -> VeryUnbalanced
+    member this.MinAny = match this with | Balanced | SemiBalanced -> 2 | Unbalanced | VeryUnbalanced -> 0
+    member this.MaxAny = match this with | Balanced -> 5 | SemiBalanced -> 6 | Unbalanced -> 7 | VeryUnbalanced -> 13
 
 exception DuplicateCardsForHandException of duplicateCount:int
-exception InsufficientCardsForFullHandException of required:int
+exception InsufficientCardsForHandException of required:int
 
 type Hand = private { HandCards' : Set<Card> } with
     static member Make(cards) =
@@ -72,7 +96,7 @@ type Hand = private { HandCards' : Set<Card> } with
         match cards.Length - asSet.Count with
         | 0 -> ()
         | duplicateCount -> raise (DuplicateCardsForHandException duplicateCount)
-        if asSet.Count <> CARDS_PER_HAND then raise (InsufficientCardsForFullHandException CARDS_PER_HAND)
+        if asSet.Count <> CARDS_PER_HAND then raise (InsufficientCardsForHandException CARDS_PER_HAND)
         { HandCards' = asSet }
     member this.Cards = this.HandCards' |> Seq.sortBy (fun card -> card.Suit, card.Rank) |> List.ofSeq
 
