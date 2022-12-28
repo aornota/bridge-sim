@@ -152,22 +152,22 @@ let wip () =
             cc (CcConstraint.AtLeast 4)
             //shape (ShapeConstraint.ShapeCategories [ Balanced; SemiBalanced ])
             //shape (ShapeConstraint.Shapes [ EightTwoTwoOne; EightThreeOneOne; EightThreeTwoZero; EightFourOneZero; EightFiveZeroZero ])
-            shape (ShapeConstraint.SuitCounts [ (4, 1, 4, 4); (5, 0, 4, 4); (4, 0, 5, 4); (4, 0, 4, 5) ])
-            //shape (ShapeConstraint.SuitConstraints (Some (SuitConstraint.AtLeast 5), Some (SuitConstraint.AtMost 2), Some (SuitConstraint.Between (1, 3)), Some (SuitConstraint.Exactly 3)))
-            (* cards [
+            //shape (ShapeConstraint.SuitCounts [ (4, 1, 4, 4); (5, 0, 4, 4); (4, 0, 5, 4); (4, 0, 4, 5) ])
+            shape (ShapeConstraint.SuitConstraints (Some (SuitConstraint.AtLeast 4), Some (SuitConstraint.AtMost 5), Some (SuitConstraint.Between (1, 4)), Some (SuitConstraint.Exactly 2)))
+            cards [
                 Ace, Spade
                 Queen, Spade
-                //Seven, Spade
-                //Four, Spade
+                Seven, Spade
+                Four, Spade
                 King, Heart
-                //Eight, Heart
-                //Five, Heart
-                //Three, Heart
-                //Two, Heart
+                Eight, Heart
+                Five, Heart
+                Three, Heart
+                Two, Heart
                 Ace, Diamond
                 Jack, Diamond
                 King, Club
-                Queen, Club ] *)
+                Queen, Club ]
             //customPredicate (fun _ -> false)
         }
     writeNewLine firstSeat.Text ConsoleColor.Cyan

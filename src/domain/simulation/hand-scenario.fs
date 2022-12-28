@@ -128,28 +128,28 @@ type ShapeConstraint =
                 | _ ->
                     match minHearts, minDiamonds, minClubs with
                     | Some (Some minHearts), Some (Some minDiamonds), Some (Some minClubs) -> CARDS_PER_HAND - (minHearts + minDiamonds + minClubs)
-                    | _ -> SuitConstraint.ImplicitMin
+                    | _ -> SuitConstraint.ImplicitMax
             | Heart ->
                 match heartsConstraint |> Option.map (fun heartsConstraint -> heartsConstraint.Max) with
                 | Some (Some max) -> max
                 | _ ->
                     match minSpades, minDiamonds, minClubs with
                     | Some (Some minSpades), Some (Some minDiamonds), Some (Some minClubs) -> CARDS_PER_HAND - (minSpades + minDiamonds + minClubs)
-                    | _ -> SuitConstraint.ImplicitMin
+                    | _ -> SuitConstraint.ImplicitMax
             | Diamond ->
                 match diamondsConstraint |> Option.map (fun diamondsConstraint -> diamondsConstraint.Max) with
                 | Some (Some max) -> max
                 | _ ->
                     match minSpades, minHearts, minClubs with
                     | Some (Some minSpades), Some (Some minHearts), Some (Some minClubs) -> CARDS_PER_HAND - (minSpades + minHearts + minClubs)
-                    | _ -> SuitConstraint.ImplicitMin
+                    | _ -> SuitConstraint.ImplicitMax
             | Club ->
                 match clubsConstraint |> Option.map (fun clubsConstraint -> clubsConstraint.Max) with
                 | Some (Some max) -> max
                 | _ ->
                     match minSpades, minHearts, minDiamonds with
                     | Some (Some minSpades), Some (Some minHearts), Some (Some minDiamonds) -> CARDS_PER_HAND - (minSpades + minHearts + minDiamonds)
-                    | _ -> SuitConstraint.ImplicitMin
+                    | _ -> SuitConstraint.ImplicitMax
     // TODO-NMB: Is this necessary?...member this.MaxAny = [ this.Max Spade; this.Max Heart; this.Max Diamond; this.Max Club ] |> List.max
     member this.Matches (hand:Hand) =
         match this with
@@ -261,24 +261,46 @@ exception CardsCannotSatisfyMinimumHandHcpException of Seat * Card list * int<hc
 exception CardsCannotSatisfyMinimumHandCcException of Seat * Card list * int<cc>
 exception CardsCannotSatisfyMaximumHandHcpException of Seat * Card list * int<hcp>
 exception CardsCannotSatisfyMaximumHandCcException of Seat * Card list * int<cc>
+exception CardsCannotSatisfyMinimumSuitLengthException of Seat * Card list * Suit * int
+exception CardsCannotSatisfyMaximumSuitLengthException of Seat * Card list * Suit * int
 
 let validate (state:HandScenario) =
-    if state.Cards.Length = CARDS_PER_HAND then // only validate minimum HCP / CC if all Cards specified (i.e. optimistically assume constraint could be satisfied by "missing" Cards)
-        let hand = Hand.Make state.Cards' // can use Hand as have requisite number of Cards
+    // Only validate minimum HCP / CC / suit lengths if all Cards specified (i.e. optimistically assume constraint could be satisfied by "missing" Cards).
+    if state.Cards.Length = CARDS_PER_HAND then
+        let hand = Hand.Make state.Cards // can use Hand as have requisite number of Cards
         match state.HcpConstraint |> Option.map (fun hcpConstraint -> hcpConstraint.Min), hand.Hcp with
-        | Some min, hcp when hcp < min -> raise (CardsCannotSatisfyMinimumHandHcpException (state.Seat, state.Cards', min))
+        | Some min, hcp when hcp < min -> raise (CardsCannotSatisfyMinimumHandHcpException (state.Seat, state.Cards, min))
         | _ -> ()
         match state.CcConstraint |> Option.map (fun ccConstraint -> ccConstraint.Min), hand.Cc with
-        | Some min, cc when cc < min -> raise (CardsCannotSatisfyMinimumHandCcException (state.Seat, state.Cards', min))
+        | Some min, cc when cc < min -> raise (CardsCannotSatisfyMinimumHandCcException (state.Seat, state.Cards, min))
         | _ -> ()
-    if state.Cards'.Length > 0 then // only validate maximum HCP / CC if some Cards specified.
-        match state.HcpConstraint |> Option.map (fun hcpConstraint -> hcpConstraint.Min), hcp state.Cards' with
-        | Some max, hcp when hcp > max -> raise (CardsCannotSatisfyMaximumHandHcpException (state.Seat, state.Cards', max))
+        match state.ShapeConstraint with
+        | Some shapeConstraint ->
+            let spadesCount, heartsCount, diamondsCount, clubsCount = hand.SuitCounts
+            let minSpades, minHearts, minDiamonds, minClubs = shapeConstraint.Min Spade, shapeConstraint.Min Heart, shapeConstraint.Min Diamond, shapeConstraint.Min Club
+            if spadesCount < minSpades then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Seat, state.Cards, Spade, minSpades))
+            if heartsCount < minHearts then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Seat, state.Cards, Heart, minHearts))
+            if diamondsCount < minDiamonds then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Seat, state.Cards, Diamond, minDiamonds))
+            if clubsCount < minClubs then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Seat, state.Cards, Club, minClubs))
+        | None -> ()
+    // Always validate maximum HCP / CC / suit lengths if any Cards specified.
+    if state.Cards.Length > 0 then
+        match state.HcpConstraint |> Option.map (fun hcpConstraint -> hcpConstraint.Max), hcp state.Cards with
+        | Some max, hcp when hcp > max -> raise (CardsCannotSatisfyMaximumHandHcpException (state.Seat, state.Cards, max))
         | _ -> ()
-        match state.CcConstraint |> Option.map (fun ccConstraint -> ccConstraint.Min), cc state.Cards' with
-        | Some max, cc when cc > max -> raise (CardsCannotSatisfyMaximumHandCcException (state.Seat, state.Cards', max))
+        match state.CcConstraint |> Option.map (fun ccConstraint -> ccConstraint.Max), cc state.Cards with
+        | Some max, cc when cc > max -> raise (CardsCannotSatisfyMaximumHandCcException (state.Seat, state.Cards, max))
         | _ -> ()
-    // TODO-NMB: More validation (e.g. shape constraints &c.)...
+        match state.ShapeConstraint with
+        | Some shapeConstraint ->
+            let suitCount suit = (cardsForSuit suit state.Cards).Length
+            let spadesCount, heartsCount, diamondsCount, clubsCount = suitCount Spade, suitCount Heart, suitCount Diamond, suitCount Club
+            let maxSpades, maxHearts, maxDiamonds, maxClubs = shapeConstraint.Max Spade, shapeConstraint.Max Heart, shapeConstraint.Max Diamond, shapeConstraint.Max Club
+            if spadesCount > maxSpades then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Seat, state.Cards, Spade, maxSpades))
+            if heartsCount > maxHearts then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Seat, state.Cards, Heart, maxHearts))
+            if diamondsCount > maxDiamonds then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Seat, state.Cards, Diamond, maxDiamonds))
+            if clubsCount > maxClubs then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Seat, state.Cards, Club, maxClubs))
+        | None -> ()
     state
 
 exception NoHandPropsException
