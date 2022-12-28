@@ -4,10 +4,17 @@ open Aornota.BridgeSim.Domain.Core
 
 exception UnexpectedHandShapeException
 
+let hcp (cards:Card list) = cards  |> Seq.sumBy (fun card -> card.Rank.Hcp)
+
+let cc (cards:Card list) = cards |> Seq.sumBy(fun card -> card.Rank.Cc)
+
+let cardsForSuit suit (cards:Card list) = cards |> Seq.filter (fun card -> card.Suit = suit) |> List.ofSeq
+
 type Hand with
-    member this.Hcp = this.Cards |> Seq.sumBy (fun card -> card.Rank.Hcp)
-    member this.CardsForSuit(suit) = this.Cards |> Seq.filter (fun card -> card.Suit = suit) |> List.ofSeq
-    member this.CountForSuit(suit) = this.CardsForSuit(suit).Length
+    member this.Hcp = hcp this.Cards
+    member this.Cc = cc this.Cards
+    member this.CardsForSuit suit = this.Cards |> cardsForSuit suit
+    member this.CountForSuit suit = this.CardsForSuit(suit).Length
     member this.SuitCounts = this.CountForSuit(Spade), this.CountForSuit(Heart), this.CountForSuit(Diamond), this.CountForSuit(Club)
     member this.Shape =
         let spadeCount, heartCount, diamondCount, clubCount = this.SuitCounts

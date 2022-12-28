@@ -10,13 +10,15 @@ open Aornota.BridgeSim.Domain.Evaluation.Core
 open Aornota.BridgeSim.Domain.Formatting.Auction
 open Aornota.BridgeSim.Domain.Formatting.Core
 open Aornota.BridgeSim.Domain.Formatting.Deal
+open Aornota.BridgeSim.Domain.Random.Deal
+open Aornota.BridgeSim.Domain.Simulation.Constraint
+open Aornota.BridgeSim.Domain.Simulation.HandScenario
 
 open System
 
-let private openerPosition = North // arbitrary
-let private vulnerability = NotVulnerable // arbitrary
+let private openerPosition, vulnerability = North, NotVulnerable // arbitrary
 
-let private exampleAuction = "1C-1S-1NT-2H-2S-3H-6S (declared by responder)"
+let private scenario = "1C-1S-1NT-2H-2S-3H-6S (declared by responder)"
 
 let private opener =
     Hand.Make [
@@ -35,7 +37,7 @@ let private opener =
         Card.Make (Queen, Club)
     ]
 
-(* let private responderMatches (hand:Hand) =
+let private responderMatches (hand:Hand) =
     let shapeMatches =
         match hand.SuitCounts with
         | 4, 1, 4, 4
@@ -43,8 +45,8 @@ let private opener =
         | 4, 0, 5, 4
         | 4, 0, 4, 5 -> true
         | _ -> false
-    shapeMatches && hand.Hcp >= 9<hcp> && hand.ControlCount = 4 *)
-(* TEMP-NMB: Only with void in hearts... *)
+    shapeMatches && hand.Hcp >= 9<hcp> && hand.Cc = 4<cc>
+(* TEMP-NMB: Only with void in hearts...
 let private responderMatches (hand:Hand) =
     let shapeMatches =
         match hand.SuitCounts with
@@ -52,14 +54,14 @@ let private responderMatches (hand:Hand) =
         | 4, 0, 5, 4
         | 4, 0, 4, 5 -> true
         | _ -> false
-    shapeMatches && hand.Hcp >= 9<hcp> && hand.ControlCount = 4
+    shapeMatches && hand.Hcp >= 9<hcp> && hand.Cc = 4<cc> *)
 (* TEMP-NMB: Only with void in hearts and 5 spades...
 let private responderMatches (hand:Hand) =
     let shapeMatches =
         match hand.SuitCounts with
         | 5, 0, 4, 4 -> true
         | _ -> false
-    shapeMatches && hand.Hcp >= 9<hcp> && hand.ControlCount = 4 *)
+    shapeMatches && hand.Hcp >= 9<hcp> && hand.Cc = 4<cc> *)
 (* TEMP-NMB: Only with void in hearts or singleton Ah...
 let private responderMatches (hand:Hand) =
     let shapeMatches =
@@ -69,11 +71,15 @@ let private responderMatches (hand:Hand) =
         | 4, 0, 5, 4
         | 4, 0, 4, 5 -> true
         | _ -> false
-    shapeMatches && hand.Hcp >= 9<hcp> && hand.ControlCount = 4 *)
+    shapeMatches && hand.Hcp >= 9<hcp> && hand.Cc = 4<cc> *)
 
-let private contracts = [ SixLevel, Suit Spade, false; SevenLevel, Suit Spade, false ]
+let private contracts = [ SixLevel, NoTrump, false; SixLevel, Suit Spade, false; SevenLevel, NoTrump, false; SevenLevel, Suit Spade, false ]
 
-let generate i : (int * Deal) option =
+// TEMP-NMB...let private scenario = "1C-1S... when opener is 3=3=3=4 and responder is 4=4=5=0 (25-29 total HCP)"
+
+// TEMP-NMB...let private contracts = [ ThreeLevel, NoTrump, true; FourLevel, Suit Spade, false; FourLevel, Suit Heart, true ; FiveLevel, Suit Diamond, true ]
+
+let generateForOpener i : (int * Deal) option =
     let shuffledDeck, _ = Deck.MakeShuffled().Deal(CARDS_PER_HAND * 4)
     let nonOpenerCards = shuffledDeck |> List.filter (fun card -> opener.Cards |> List.contains card |> not)
     let responder = nonOpenerCards |> List.take CARDS_PER_HAND |> Hand.Make
@@ -83,12 +89,23 @@ let generate i : (int * Deal) option =
         Some (i, Deal.Make(openerPosition, vulnerability, vulnerability, opener, openerLHO, responder, openerRHO))
     else None
 
+let generateForOpener4333 i : (int * Deal) option =
+    let deal = Deal.MakeRandom()
+    let opener = deal.Hand(openerPosition)
+    match opener.SuitCounts, opener.Hcp with
+    | (3, 3, 3, 4), openerHcp when openerHcp >= 16<hcp> ->
+        let responder = deal.Hand(openerPosition.Partner)
+        match responder.SuitCounts, responder.Hcp with
+        | (4, 4, 5, 0), responderHcp when responderHcp >= 9<hcp> && openerHcp + responderHcp <= 29<hcp> -> Some (i, deal)
+        | _ -> None
+    | _ -> None
+
 let run count =
     if count = 0 then raise CountMustBeGreaterThanZeroException
     let countText = if count = 1 then "deal" else "deals"
-    writeNewLine $"{exampleAuction} -> generating and analyzing {count} matching {countText}:\n" ConsoleColor.Magenta
+    writeNewLine $"{scenario} -> generating and analyzing {count} matching {countText}:\n" ConsoleColor.Magenta
     writeBlankLine()
-    let generator = Seq.initInfinite generate |> Seq.choose id
+    let generator = Seq.initInfinite generateForOpener |> Seq.choose id
     let mutable iMax = 0
     let mutable contractsResults = []
     let start = DateTime.UtcNow
@@ -122,4 +139,29 @@ let run count =
         writeNewLine $"{contract}: %0.2f{makePercentage}%%" ConsoleColor.Gray
     )
     writeBlankLine()
-    writeNewLine $"{exampleAuction} -> generated and analyzed {count} matching {countText} (from {iMax} random deal/s) in %0.2f{(DateTime.UtcNow - start).TotalSeconds} seconds" ConsoleColor.DarkYellow
+    writeNewLine $"{scenario} -> generated and analyzed {count} matching {countText} (from {iMax} random deal/s) in %0.2f{(DateTime.UtcNow - start).TotalSeconds} seconds" ConsoleColor.DarkYellow
+
+let wip () =
+    writeNewLine "Work-in-progress for scenario {...} computation expressions...\n" ConsoleColor.Magenta
+    let firstSeat =
+        handScenario {
+            seat FirstSeat
+            hcp (Between (18<hcp>, 25<hcp>))
+            cc (AtLeast 4<cc>)
+            cards [
+                Ace, Spade
+                Queen, Spade
+                Seven, Spade
+                Four, Spade
+                King, Heart
+                Eight, Heart
+                Five, Heart
+                Three, Heart
+                Two, Heart
+                Ace, Diamond
+                Jack, Diamond
+                King, Club
+                Queen, Club ]
+            customPredicate (fun _ -> false)
+        }
+    writeNewLine firstSeat.Text ConsoleColor.Cyan

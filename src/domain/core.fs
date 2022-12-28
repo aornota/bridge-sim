@@ -5,9 +5,11 @@ open Aornota.BridgeSim.Common.Mathy
 let [<Literal>] CARDS_PER_HAND = 13
 
 type [<Measure>] hcp // high-card points
+type [<Measure>] cc // control count
 
 type Rank = | Ace | King | Queen | Jack | Ten | Nine | Eight | Seven | Six | Five | Four | Three | Two with
     member this.Hcp = match this with | Ace -> 4<hcp> | King -> 3<hcp> | Queen -> 2<hcp> | Jack -> 1<hcp> | _ -> 0<hcp>
+    member this.Cc = match this  with | Ace -> 2<cc> | King -> 1<cc> | _ -> 0<cc>
 
 type Suit = | Spade | Heart | Diamond | Club with
     member this.IsMajor = match this with | Spade | Heart -> true | Diamond | Club -> false
@@ -61,12 +63,16 @@ type ShapeCategory =
         | FourFourFourOne | FiveFourThreeOne | FiveFourFourZero | SixThreeThreeOne | SevenTwoTwoTwo -> Unbalanced
         | _ -> VeryUnbalanced
 
-exception IncorrectDistinctCardCountForHandException of required:int
+exception DuplicateCardsForHandException of duplicateCount:int
+exception InsufficientCardsForFullHandException of required:int
 
 type Hand = private { HandCards' : Set<Card> } with
     static member Make(cards) =
         let asSet = cards |> Set.ofList
-        if asSet.Count <> CARDS_PER_HAND then raise (IncorrectDistinctCardCountForHandException CARDS_PER_HAND)
+        match cards.Length - asSet.Count with
+        | 0 -> ()
+        | duplicateCount -> raise (DuplicateCardsForHandException duplicateCount)
+        if asSet.Count <> CARDS_PER_HAND then raise (InsufficientCardsForFullHandException CARDS_PER_HAND)
         { HandCards' = asSet }
     member this.Cards = this.HandCards' |> Seq.sortBy (fun card -> card.Suit, card.Rank) |> List.ofSeq
 

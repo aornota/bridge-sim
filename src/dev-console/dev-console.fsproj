@@ -21,6 +21,9 @@
         <Compile Include="..\domain\formatting\auction.fs" />
         <Compile Include="..\domain\formatting\deal.fs" />
         <Compile Include="..\domain\scoring\auction.fs" />
+        <Compile Include="..\domain\simulation\constraint.fs" />
+        <Compile Include="..\domain\simulation\hand-scenario.fs" />
+        <Compile Include="..\domain\simulation\scenario.fs" />
         <Compile Include="..\dds-interop\dds.fs" />
         <Compile Include="common.fs" />
         <Compile Include="scratch\core.fs" />

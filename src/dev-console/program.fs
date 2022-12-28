@@ -44,7 +44,8 @@ let private mainAsync () = async {
         //Scratch.Dds.forcingOpening1CAnd1HResponse 10 true
         //Scratch.Dds.forcingOpening1CAnd1SResponse 10 true
         //Scratch.Dds.forcingOpening2C 10 true
-        Scratch.DdsSimulation.run 1000
+        //Scratch.DdsSimulation.run 2000
+        Scratch.DdsSimulation.wip ()
 
         //Scratch.Classification.run 10000
 
