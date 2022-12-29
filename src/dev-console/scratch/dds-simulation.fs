@@ -145,9 +145,9 @@ let run count =
 
 let wip () =
     writeNewLine "Work-in-progress for scenario {...} computation expressions...\n" ConsoleColor.Magenta
-    let firstSeat =
+    let north =
         handScenario {
-            seat FirstSeat
+            position North
             hcp (HandHcpConstraint.Between (18, 25))
             cc (CcConstraint.AtLeast 4)
             //shape (ShapeConstraint.ShapeCategories [ Balanced; SemiBalanced ])
@@ -170,4 +170,13 @@ let wip () =
                 Queen, Club ]
             //customPredicate (fun _ -> false)
         }
-    writeNewLine firstSeat.Text ConsoleColor.Cyan
+    writeNewLine north.Text ConsoleColor.Cyan
+    writeBlankLine()
+    let northSouth =
+        partnershipScenario {
+            partnership NorthSouth
+            hcp (PartnershipHcpConstraint.AtMost 29)
+            cc (CcConstraint.AtMost 9)
+            shape (PartnershipShapeConstraint.SuitCounts [ (9, 6, 6, 5); (10, 6, 6, 4) ])
+        }
+    writeNewLine northSouth.Text ConsoleColor.Cyan

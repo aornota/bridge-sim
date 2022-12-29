@@ -1,10 +1,8 @@
 module Aornota.BridgeSim.Domain.Simulation.HandScenario
 
 open Aornota.BridgeSim.Domain.Core
-open Aornota.BridgeSim.Domain.Deal
 open Aornota.BridgeSim.Domain.Evaluation.Core
 open Aornota.BridgeSim.Domain.Formatting.Core
-open Aornota.BridgeSim.Domain.Formatting.Deal
 open Aornota.BridgeSim.Domain.Simulation.ComparisonConstraint
 
 exception EmptyListForShapeCategoriesException
@@ -107,7 +105,7 @@ type ShapeConstraint =
                     match maxSpades, maxHearts, maxDiamonds with
                     | Some (Some maxSpades), Some (Some maxHearts), Some (Some maxDiamonds) -> CARDS_PER_HAND - (maxSpades + maxHearts + maxDiamonds)
                     | _ -> SuitConstraint.ImplicitMin
-    // TODO-NMB: Is this necessary?...member this.MinAny = [ this.Min Spade; this.Min Heart; this.Min Diamond; this.Min Club ] |> List.min
+    // TODO-NMB-REMOVE?...member this.MinAny = [ this.Min Spade; this.Min Heart; this.Min Diamond; this.Min Club ] |> List.min
     member this.Max (suit:Suit) =
         match this with
         | ShapeCategories' shapeCategories -> shapeCategories |> List.map (fun shapeCategory -> shapeCategory.MaxAny) |> List.max
@@ -150,7 +148,7 @@ type ShapeConstraint =
                     match minSpades, minHearts, minDiamonds with
                     | Some (Some minSpades), Some (Some minHearts), Some (Some minDiamonds) -> CARDS_PER_HAND - (minSpades + minHearts + minDiamonds)
                     | _ -> SuitConstraint.ImplicitMax
-    // TODO-NMB: Is this necessary?...member this.MaxAny = [ this.Max Spade; this.Max Heart; this.Max Diamond; this.Max Club ] |> List.max
+    // TODO-NMB-REMOVE?...member this.MaxAny = [ this.Max Spade; this.Max Heart; this.Max Diamond; this.Max Club ] |> List.max
     member this.Matches (hand:Hand) =
         match this with
         | ShapeCategories' shapeCategories -> shapeCategories |> List.contains hand.ShapeCategory
@@ -180,21 +178,21 @@ type ShapeConstraint =
             | [] -> "(none)" // should never happen
 
 type HandScenario = private {
-    Seat': Seat
+    Position': Position
     HcpConstraint': HandHcpConstraint option
     CcConstraint': CcConstraint option
     ShapeConstraint': ShapeConstraint option
     Cards': Card list
     CustomPredicate': (Hand -> bool) option }
     with
-    static member Make seat = {
-        Seat' = seat
+    static member Make position = {
+        Position' = position
         HcpConstraint' = None
         CcConstraint' = None
         ShapeConstraint' = None
         Cards' = []
         CustomPredicate' = None }
-    member this.Seat = this.Seat'
+    member this.Position = this.Position'
     member this.HcpConstraint = this.HcpConstraint'
     member this.CcConstraint = this.CcConstraint'
     member this.ShapeConstraint = this.ShapeConstraint'
@@ -222,90 +220,90 @@ type HandScenario = private {
             match [ hcpText; ccText; shapeText; cardsText; customPredicateText ] |> List.choose id with
             | h :: t -> h :: t |> String.concat " | "
             | [] -> "(none)" // should never happen
-        $"{this.Seat.ShortText}: {constraintsText}"
+        $"{this.Position.ShortText}: {constraintsText}"
 
 [<RequireQualifiedAccess>]
 type HandProp =
-    | Seat of Seat
+    | Position of Position
     | HcpConstraint of HandHcpConstraint
     | CcConstraint of CcConstraint
     | ShapeConstraint of ShapeConstraint
     | Cards of (Rank * Suit) list
     | CustomPredicate of (Hand -> bool)
 
-exception OtherHandPropIsSeatException of Seat
-exception HandPropAlreadySpecifiedException of Seat * HandProp
-exception EmptyListForCardsHandPropException of Seat
-exception DuplicateCardsForHandPropException of Seat * int
+exception OtherHandPropIsPositionException of Position
+exception HandPropAlreadySpecifiedException of Position * HandProp
+exception EmptyListForCardsHandPropException of Position
+exception DuplicateCardsForHandPropException of Position * int
 
 let private folder (state:HandScenario) prop =
     match prop with
-    | HandProp.Seat seat -> raise (OtherHandPropIsSeatException seat) // should never happen as would not compile
-    | HandProp.HcpConstraint _ when state.HcpConstraint |> Option.isSome -> raise (HandPropAlreadySpecifiedException (state.Seat, prop))
-    | HandProp.CcConstraint _ when state.CcConstraint |> Option.isSome -> raise (HandPropAlreadySpecifiedException (state.Seat, prop))
-    | HandProp.ShapeConstraint _ when state.ShapeConstraint |> Option.isSome -> raise (HandPropAlreadySpecifiedException (state.Seat, prop))
-    | HandProp.Cards _ when state.Cards.Length > 0 -> raise (HandPropAlreadySpecifiedException (state.Seat, prop))
-    | HandProp.CustomPredicate _ when state.CustomPredicate |> Option.isSome -> raise (HandPropAlreadySpecifiedException (state.Seat, prop))
+    | HandProp.Position position -> raise (OtherHandPropIsPositionException position) // should never happen as would not compile
+    | HandProp.HcpConstraint _ when state.HcpConstraint |> Option.isSome -> raise (HandPropAlreadySpecifiedException (state.Position, prop))
+    | HandProp.CcConstraint _ when state.CcConstraint |> Option.isSome -> raise (HandPropAlreadySpecifiedException (state.Position, prop))
+    | HandProp.ShapeConstraint _ when state.ShapeConstraint |> Option.isSome -> raise (HandPropAlreadySpecifiedException (state.Position, prop))
+    | HandProp.Cards _ when state.Cards.Length > 0 -> raise (HandPropAlreadySpecifiedException (state.Position, prop))
+    | HandProp.CustomPredicate _ when state.CustomPredicate |> Option.isSome -> raise (HandPropAlreadySpecifiedException (state.Position, prop))
     | HandProp.HcpConstraint hcpConstraint -> { state with HcpConstraint' = Some hcpConstraint }
     | HandProp.CcConstraint ccConstraint -> { state with CcConstraint' = Some ccConstraint }
     | HandProp.ShapeConstraint shapeConstraint -> { state with ShapeConstraint' = Some shapeConstraint }
     | HandProp.Cards cards ->
         let cards = cards |> List.map (fun (rank, suit) -> Card.Make (rank, suit))
         match cards.Length, cards.Length - (cards |> Set.ofList).Count with
-        | 0, _ -> raise (EmptyListForCardsHandPropException state.Seat)
+        | 0, _ -> raise (EmptyListForCardsHandPropException state.Position)
         | _, 0 -> { state with Cards' = cards }
-        | _, duplicateCount -> raise (DuplicateCardsForHandPropException (state.Seat, duplicateCount))
+        | _, duplicateCount -> raise (DuplicateCardsForHandPropException (state.Position, duplicateCount))
     | HandProp.CustomPredicate customPredicate -> { state with CustomPredicate' = Some customPredicate }
 
-exception CardsCannotSatisfyMinimumHandHcpException of Seat * Card list * int<hcp>
-exception CardsCannotSatisfyMinimumHandCcException of Seat * Card list * int<cc>
-exception CardsCannotSatisfyMaximumHandHcpException of Seat * Card list * int<hcp>
-exception CardsCannotSatisfyMaximumHandCcException of Seat * Card list * int<cc>
-exception CardsCannotSatisfyMinimumSuitLengthException of Seat * Card list * Suit * int
-exception CardsCannotSatisfyMaximumSuitLengthException of Seat * Card list * Suit * int
+exception CardsCannotSatisfyMinimumHandHcpException of Position * Card list * int<hcp>
+exception CardsCannotSatisfyMinimumHandCcException of Position * Card list * int<cc>
+exception CardsCannotSatisfyMaximumHandHcpException of Position * Card list * int<hcp>
+exception CardsCannotSatisfyMaximumHandCcException of Position * Card list * int<cc>
+exception CardsCannotSatisfyMinimumSuitLengthException of Position * Card list * Suit * int
+exception CardsCannotSatisfyMaximumSuitLengthException of Position * Card list * Suit * int
 
 let validate (state:HandScenario) =
     // Only validate minimum HCP / CC / suit lengths if all Cards specified (i.e. optimistically assume constraint could be satisfied by "missing" Cards).
     if state.Cards.Length = CARDS_PER_HAND then
         let hand = Hand.Make state.Cards // can use Hand as have requisite number of Cards
         match state.HcpConstraint |> Option.map (fun hcpConstraint -> hcpConstraint.Min), hand.Hcp with
-        | Some min, hcp when hcp < min -> raise (CardsCannotSatisfyMinimumHandHcpException (state.Seat, state.Cards, min))
+        | Some min, hcp when hcp < min -> raise (CardsCannotSatisfyMinimumHandHcpException (state.Position, state.Cards, min))
         | _ -> ()
         match state.CcConstraint |> Option.map (fun ccConstraint -> ccConstraint.Min), hand.Cc with
-        | Some min, cc when cc < min -> raise (CardsCannotSatisfyMinimumHandCcException (state.Seat, state.Cards, min))
+        | Some min, cc when cc < min -> raise (CardsCannotSatisfyMinimumHandCcException (state.Position, state.Cards, min))
         | _ -> ()
         match state.ShapeConstraint with
         | Some shapeConstraint ->
             let spadesCount, heartsCount, diamondsCount, clubsCount = hand.SuitCounts
             let minSpades, minHearts, minDiamonds, minClubs = shapeConstraint.Min Spade, shapeConstraint.Min Heart, shapeConstraint.Min Diamond, shapeConstraint.Min Club
-            if spadesCount < minSpades then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Seat, state.Cards, Spade, minSpades))
-            if heartsCount < minHearts then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Seat, state.Cards, Heart, minHearts))
-            if diamondsCount < minDiamonds then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Seat, state.Cards, Diamond, minDiamonds))
-            if clubsCount < minClubs then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Seat, state.Cards, Club, minClubs))
+            if spadesCount < minSpades then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Position, state.Cards, Spade, minSpades))
+            if heartsCount < minHearts then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Position, state.Cards, Heart, minHearts))
+            if diamondsCount < minDiamonds then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Position, state.Cards, Diamond, minDiamonds))
+            if clubsCount < minClubs then raise (CardsCannotSatisfyMinimumSuitLengthException (state.Position, state.Cards, Club, minClubs))
         | None -> ()
     // Always validate maximum HCP / CC / suit lengths if any Cards specified.
     if state.Cards.Length > 0 then
         match state.HcpConstraint |> Option.map (fun hcpConstraint -> hcpConstraint.Max), hcp state.Cards with
-        | Some max, hcp when hcp > max -> raise (CardsCannotSatisfyMaximumHandHcpException (state.Seat, state.Cards, max))
+        | Some max, hcp when hcp > max -> raise (CardsCannotSatisfyMaximumHandHcpException (state.Position, state.Cards, max))
         | _ -> ()
         match state.CcConstraint |> Option.map (fun ccConstraint -> ccConstraint.Max), cc state.Cards with
-        | Some max, cc when cc > max -> raise (CardsCannotSatisfyMaximumHandCcException (state.Seat, state.Cards, max))
+        | Some max, cc when cc > max -> raise (CardsCannotSatisfyMaximumHandCcException (state.Position, state.Cards, max))
         | _ -> ()
         match state.ShapeConstraint with
         | Some shapeConstraint ->
             let suitCount suit = (cardsForSuit suit state.Cards).Length
             let spadesCount, heartsCount, diamondsCount, clubsCount = suitCount Spade, suitCount Heart, suitCount Diamond, suitCount Club
             let maxSpades, maxHearts, maxDiamonds, maxClubs = shapeConstraint.Max Spade, shapeConstraint.Max Heart, shapeConstraint.Max Diamond, shapeConstraint.Max Club
-            if spadesCount > maxSpades then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Seat, state.Cards, Spade, maxSpades))
-            if heartsCount > maxHearts then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Seat, state.Cards, Heart, maxHearts))
-            if diamondsCount > maxDiamonds then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Seat, state.Cards, Diamond, maxDiamonds))
-            if clubsCount > maxClubs then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Seat, state.Cards, Club, maxClubs))
+            if spadesCount > maxSpades then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Position, state.Cards, Spade, maxSpades))
+            if heartsCount > maxHearts then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Position, state.Cards, Heart, maxHearts))
+            if diamondsCount > maxDiamonds then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Position, state.Cards, Diamond, maxDiamonds))
+            if clubsCount > maxClubs then raise (CardsCannotSatisfyMaximumSuitLengthException (state.Position, state.Cards, Club, maxClubs))
         | None -> ()
     state
 
 exception NoHandPropsException
-exception NoOtherHandPropsException of Seat
-exception FirstHandPropNotSeatException of HandProp
+exception NoOtherHandPropsException of Position
+exception FirstHandPropNotPositionException of HandProp
 
 type HandScenarioBuilder() =
     member inline _.Yield (()) = ()
@@ -313,17 +311,17 @@ type HandScenarioBuilder() =
     member _.Run (props: HandProp list) =
         match props |> List.rev with
         | [] -> raise NoHandPropsException // should never happen as would not compile
-        | HandProp.Seat seat :: otherProps ->
+        | HandProp.Position position :: otherProps ->
             match otherProps with
-            | [] -> raise (NoOtherHandPropsException seat)
+            | [] -> raise (NoOtherHandPropsException position)
             | _ ->
                 otherProps
-                |> List.fold folder (HandScenario.Make seat)
+                |> List.fold folder (HandScenario.Make position)
                 |> validate
-        | firstProp :: _ -> raise (FirstHandPropNotSeatException firstProp) // should never happen as would not compile
+        | firstProp :: _ -> raise (FirstHandPropNotPositionException firstProp) // should never happen as would not compile
 
-    [<CustomOperation("seat")>]
-    member inline _.Seat ((), seat) = [ HandProp.Seat seat ]
+    [<CustomOperation("position")>]
+    member inline _.Position ((), position) = [ HandProp.Position position ]
 
     [<CustomOperation("hcp")>]
     member inline _.HcpConstraint (props, hcpConstraint) = HandProp.HcpConstraint hcpConstraint :: props
