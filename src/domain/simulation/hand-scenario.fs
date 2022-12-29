@@ -105,7 +105,6 @@ type ShapeConstraint =
                     match maxSpades, maxHearts, maxDiamonds with
                     | Some (Some maxSpades), Some (Some maxHearts), Some (Some maxDiamonds) -> CARDS_PER_HAND - (maxSpades + maxHearts + maxDiamonds)
                     | _ -> SuitConstraint.ImplicitMin
-    // TODO-NMB-REMOVE?...member this.MinAny = [ this.Min Spade; this.Min Heart; this.Min Diamond; this.Min Club ] |> List.min
     member this.Max (suit:Suit) =
         match this with
         | ShapeCategories' shapeCategories -> shapeCategories |> List.map (fun shapeCategory -> shapeCategory.MaxAny) |> List.max
@@ -148,7 +147,6 @@ type ShapeConstraint =
                     match minSpades, minHearts, minDiamonds with
                     | Some (Some minSpades), Some (Some minHearts), Some (Some minDiamonds) -> CARDS_PER_HAND - (minSpades + minHearts + minDiamonds)
                     | _ -> SuitConstraint.ImplicitMax
-    // TODO-NMB-REMOVE?...member this.MaxAny = [ this.Max Spade; this.Max Heart; this.Max Diamond; this.Max Club ] |> List.max
     member this.Matches (hand:Hand) =
         match this with
         | ShapeCategories' shapeCategories -> shapeCategories |> List.contains hand.ShapeCategory

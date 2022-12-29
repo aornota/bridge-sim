@@ -231,6 +231,7 @@ type PartnershipScenarioBuilder() =
             | _ ->
                 otherProps
                 |> List.fold folder (PartnershipScenario.Make partnership)
+                // No validation (cf. HandScenario.HandScenarioBuilder.Run).
         | firstProp :: _ -> raise (FirstPartnershipPropNotPartnershipException firstProp) // should never happen as would not compile
 
     [<CustomOperation("partnership")>]
