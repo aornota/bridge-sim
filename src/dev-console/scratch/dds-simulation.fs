@@ -20,7 +20,7 @@ open System
 
 let private openerPosition, vulnerability = North, NotVulnerable // arbitrary
 
-let private scenario = "1C-1S-1NT-2H-2S-3H-6S (declared by responder)"
+let private scenarioText = "1C-1S-1NT-2H-2S-3H-6S (declared by responder)"
 
 let private opener =
     Hand.Make [
@@ -77,7 +77,7 @@ let private responderMatches (hand:Hand) =
 
 let private contracts = [ SixLevel, NoTrump, false; SixLevel, Suit Spade, false; SevenLevel, NoTrump, false; SevenLevel, Suit Spade, false ]
 
-// TEMP-NMB...let private scenario = "1C-1S... when opener is 3=3=3=4 and responder is 4=4=5=0 (25-29 total HCP)"
+// TEMP-NMB...let private scenarioText = "1C-1S... when opener is 3=3=3=4 and responder is 4=4=5=0 (25-29 total HCP)"
 
 // TEMP-NMB...let private contracts = [ ThreeLevel, NoTrump, true; FourLevel, Suit Spade, false; FourLevel, Suit Heart, true ; FiveLevel, Suit Diamond, true ]
 
@@ -105,7 +105,7 @@ let generateForOpener4333 i : (int * Deal) option =
 let run count =
     if count = 0 then raise CountMustBeGreaterThanZeroException
     let countText = if count = 1 then "deal" else "deals"
-    writeNewLine $"{scenario} -> generating and analyzing {count} matching {countText}:\n" ConsoleColor.Magenta
+    writeNewLine $"{scenarioText} -> generating and analyzing {count} matching {countText}:\n" ConsoleColor.Magenta
     writeBlankLine()
     let generator = Seq.initInfinite generateForOpener |> Seq.choose id
     let mutable iMax = 0
@@ -141,11 +141,12 @@ let run count =
         writeNewLine $"{contract}: %0.2f{makePercentage}%%" ConsoleColor.Gray
     )
     writeBlankLine()
-    writeNewLine $"{scenario} -> generated and analyzed {count} matching {countText} (from {iMax} random deal/s) in %0.2f{(DateTime.UtcNow - start).TotalSeconds} seconds" ConsoleColor.DarkYellow
+    writeNewLine $"{scenarioText} -> generated and analyzed {count} matching {countText} (from {iMax} random deal/s) in %0.2f{(DateTime.UtcNow - start).TotalSeconds} seconds" ConsoleColor.DarkYellow
 
 let wip () =
     writeNewLine "Work-in-progress for scenario {...} computation expressions...\n" ConsoleColor.Magenta
-    let north =
+    (* Test handScenario...
+    let handScenarioTest =
         handScenario {
             position North
             hcp (HandHcpConstraint.Between (18, 25))
@@ -157,26 +158,120 @@ let wip () =
             cards [
                 Ace, Spade
                 Queen, Spade
-                Seven, Spade
-                Four, Spade
+                //Seven, Spade
+                //Four, Spade
                 King, Heart
-                Eight, Heart
-                Five, Heart
-                Three, Heart
-                Two, Heart
+                //Eight, Heart
+                //Five, Heart
+                //Three, Heart
+                //Two, Heart
                 Ace, Diamond
                 Jack, Diamond
                 King, Club
                 Queen, Club ]
             //customPredicate (fun _ -> false)
         }
-    writeNewLine north.Text ConsoleColor.Cyan
-    writeBlankLine()
-    let northSouth =
+    writeNewLine $"{handScenarioTest.Text}\n" ConsoleColor.Cyan *)
+    (* Test partnershipScenario...
+    let partnershipScenarioTest =
         partnershipScenario {
             partnership NorthSouth
             hcp (PartnershipHcpConstraint.AtMost 29)
             cc (CcConstraint.AtMost 9)
             shape (PartnershipShapeConstraint.SuitCounts [ (9, 6, 6, 5); (10, 6, 6, 4) ])
         }
-    writeNewLine northSouth.Text ConsoleColor.Cyan
+    writeNewLine $"{partnershipScenario.Text}\n" ConsoleColor.Cyan *)
+
+    let sclerotic2120Ai = // strong opener with specific 4=5=2=2 | game-forcing responder with short hearts and 4 CC (no void ask)
+        scenario {
+            contracts [
+                { ContractType = Specific (SixLevel, Suit Spade); Declarer = Position South; ScenarioScoring = None }
+                { ContractType = Specific (SevenLevel, Suit Spade); Declarer = Position South; ScenarioScoring = None } ]
+            description "Sclerotic [2120-A-i]: 1C-1S-1NT-2H-2S-3H-6S (no void ask)"
+            hand (
+                handScenario {
+                    position North
+                    cards [
+                        Ace, Spade; Queen, Spade; Seven, Spade; Four, Spade
+                        King, Heart; Eight, Heart; Five, Heart; Three, Heart; Two, Heart
+                        Ace, Diamond; Jack, Diamond
+                        King, Club; Queen, Club ] })
+            hand (
+                handScenario {
+                    position South
+                    hcp (HandHcpConstraint.AtLeast 9)
+                    cc (CcConstraint.Exactly 4)
+                    shape (ShapeConstraint.SuitCounts [ (4, 1, 4, 4); (5, 0, 4, 4); (4, 0, 5, 4); (4, 0, 4, 5) ]) })
+        }
+    writeNewLine $"{sclerotic2120Ai.Text}\n" ConsoleColor.Cyan
+
+    let sclerotic2120Aii = // strong opener with specific 4=5=2=2 | game-forcing responder with heart void and 5 spades and 4 CC (with void / 5-card suit ask)
+        scenario {
+            contracts [
+                { ContractType = Specific (SixLevel, Suit Spade); Declarer = Position South; ScenarioScoring = None }
+                { ContractType = Specific (SevenLevel, Suit Spade); Declarer = Position South; ScenarioScoring = None } ]
+            description "Sclerotic [2120-A-ii]: 1C-1S-1NT-2H-2S-3H-3S-3NT-7S (with void / 5-card suit ask)"
+            hand (
+                handScenario {
+                    position North
+                    cards [
+                        Ace, Spade; Queen, Spade; Seven, Spade; Four, Spade
+                        King, Heart; Eight, Heart; Five, Heart; Three, Heart; Two, Heart
+                        Ace, Diamond; Jack, Diamond
+                        King, Club; Queen, Club ] })
+            hand (
+                handScenario {
+                    position South
+                    hcp (HandHcpConstraint.AtLeast 9)
+                    cc (CcConstraint.Exactly 4)
+                    shape (ShapeConstraint.SuitCounts [ (5, 0, 4, 4) ]) })
+        }
+    writeNewLine $"{sclerotic2120Aii.Text}\n" ConsoleColor.Cyan
+
+    let sclerotic2120B = // strong opener with specific 2=4=4=3 | game-forcing responder with short hearts and 9-10 HCP
+        scenario {
+            contracts [
+                { ContractType = Specific (SixLevel, Suit Spade); Declarer = Position South; ScenarioScoring = None }
+                { ContractType = Specific (SevenLevel, Suit Spade); Declarer = Position South; ScenarioScoring = None } ]
+            description "Sclerotic [2120-B]: 1C-1S-1NT-2H-2NT-3C-3NT"
+            hand (
+                handScenario {
+                    position North
+                    cards [
+                        King, Spade; Seven, Spade
+                        Ace, Heart; King, Heart; Queen, Heart; Jack, Heart
+                        Seven, Diamond; Six, Diamond; Five, Diamond; Three, Diamond
+                        King, Club; Eight, Club; Six, Club ] })
+            hand (
+                handScenario {
+                    position South
+                    hcp (HandHcpConstraint.Between (9, 10))
+                    shape (ShapeConstraint.SuitCounts [ (4, 1, 4, 4); (5, 0, 4, 4); (4, 0, 5, 4); (4, 0, 4, 5) ]) })
+        }
+    writeNewLine $"{sclerotic2120B.Text}\n" ConsoleColor.Cyan
+
+    let sclerotic2120C = // strong opener with 3=3=3=4 | game-forcing responder with short clubs | 25-29 partnership HCP
+        scenario {
+            contracts [
+                { ContractType = Specific (ThreeLevel, NoTrump); Declarer = Position North; ScenarioScoring = None }
+                { ContractType = Specific (FourLevel, Suit Spade); Declarer = Position South; ScenarioScoring = None }
+                { ContractType = Specific (FourLevel, Suit Heart); Declarer = Partnership NorthSouth; ScenarioScoring = None }
+                { ContractType = Specific (FiveLevel, Suit Diamond); Declarer = Partnership NorthSouth; ScenarioScoring = None }
+                { ContractType = Specific (FiveLevel, Suit Club); Declarer = Position North; ScenarioScoring = None } ]
+            description "Sclerotic [2120-C]: 1C-1S-1NT-2C-... (opener is 3=3=3=4)"
+            hand (
+                handScenario {
+                    position North
+                    hcp (HandHcpConstraint.AtLeast 16)
+                    shape (ShapeConstraint.SuitCounts [ (3, 3, 3, 4) ]) })
+            hand (
+                handScenario {
+                    position South
+                    hcp (HandHcpConstraint.AtLeast 9)
+                    shape (ShapeConstraint.SuitCounts [ (4, 4, 4, 1); (5, 4, 4, 1); (4, 5, 4, 1); (4, 4, 5, 0) ]) })
+            partnership (
+                partnershipScenario {
+                    partnership NorthSouth
+                    hcp (PartnershipHcpConstraint.AtMost 29) })
+        }
+    writeNewLine $"{sclerotic2120C.Text}\n" ConsoleColor.Cyan

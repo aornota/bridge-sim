@@ -2,6 +2,8 @@ module Aornota.BridgeSim.Domain.Simulation.ComparisonConstraint
 
 open Aornota.BridgeSim.Domain.Core
 
+// TODO-NMB: Auto-tests...
+
 type private ComparisonConstraint<'a> when 'a:comparison =
     | AtLeast of 'a
     | AtMost of 'a

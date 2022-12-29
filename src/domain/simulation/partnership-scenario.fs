@@ -5,6 +5,8 @@ open Aornota.BridgeSim.Domain.Evaluation.Core
 open Aornota.BridgeSim.Domain.Formatting.Core
 open Aornota.BridgeSim.Domain.Simulation.ComparisonConstraint
 
+// TODO-NMB: Auto-tests (inc. failing cases)...
+
 let private CARDS_PER_PARTNERSHIP = CARDS_PER_HAND * 2
 
 exception EmptyListForPartnershipSuitCountsException

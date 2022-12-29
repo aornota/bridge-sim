@@ -7,7 +7,9 @@ open Aornota.BridgeSim.Domain.Formatting.Core
 open Aornota.BridgeSim.Domain.Simulation.HandScenario
 open Aornota.BridgeSim.Domain.Simulation.PartnershipScenario
 
-// See also https://sleepyfran.github.io/blog/posts/fsharp/ce-in-fsharp/.async
+// See also https://sleepyfran.github.io/blog/posts/fsharp/ce-in-fsharp/ for exmaples of computation expression builders.
+
+// TODO-NMB: Auto-tests (inc. failing cases)...
 
 type ContractType = | Specific of Level * Strain | AnyGame | NtGame | MajorGame | MinorGame
 
@@ -64,6 +66,8 @@ type ScenarioContract = {
                 match contract with
                 | Contract (level, strain, stakes, _) -> Some $"{level.ShortText}{strain.ShortText}{stakes.ShortText}"
                 | PassedOut -> None)
+            |> List.groupBy id
+            |> List.map fst
             |> String.concat " and "
         let declarerText =
             match this.Declarer with
@@ -85,8 +89,9 @@ type ScenarioContract = {
 exception EmptyListForContractsException
 exception DuplicateContractsException of ScenarioContract list * int
 
-type Scenario = private { // TODO-NMB: Add Description'?...
+type Scenario = private {
     Contracts': ScenarioContract list
+    Description': string option
     Dealer': Position option
     Vulnerabilities': (Vulnerability * Vulnerability) option
     NorthSouthScenario': PartnershipScenario option
@@ -105,6 +110,7 @@ type Scenario = private { // TODO-NMB: Add Description'?...
             match contracts.Length - (contracts |> Set.ofList).Count with
             | 0 -> {
                 Contracts' = scenarioContracts
+                Description' = None
                 Dealer' = None
                 Vulnerabilities' = None
                 NorthSouthScenario' = None
@@ -116,6 +122,7 @@ type Scenario = private { // TODO-NMB: Add Description'?...
                 CustomPredicate' = None }
             | duplicateCount -> raise (DuplicateContractsException (scenarioContracts, duplicateCount))
     member this.Contracts = this.Contracts'
+    member this.Description = this.Description'
     member this.Dealer = this.Dealer'
     member this.Vulnerabilities = this.Vulnerabilities'
     member this.NorthSouthScenario = this.NorthSouthScenario'
@@ -126,7 +133,8 @@ type Scenario = private { // TODO-NMB: Add Description'?...
     member this.WestScenario = this.WestScenario'
     member this.CustomPredicate = this.CustomPredicate'
     member this.Text =
-        let contractsText = this.Contracts |> List.map (fun contract -> $"\n{contract.Text}") |> String.concat ""
+        // TODO-NMB: Finesse this, e.g. new-lines and tabs (especially when things are "missing")...
+        let descriptionText = match this.Description with | Some description -> $"{description} ->\n" | None -> ""
         let dealerText = this.Dealer |> Option.map (fun position -> $"Dealer: {position.Text}")
         let vulnerabilitiesText =
             this.Vulnerabilities |> Option.map (fun (northSouth, eastWest) ->
@@ -137,24 +145,28 @@ type Scenario = private { // TODO-NMB: Add Description'?...
                 | Vulnerable, Vulnerable -> "both vulnerable")
         let headerText =
             match [ dealerText; vulnerabilitiesText ] |> List.choose id with
-            | h :: t -> h :: t |> String.concat " | "
+            | h :: t ->
+                let headerText = h :: t |> String.concat " | "
+                $"\t{headerText}"
             | [] -> ""
-        let northSouthScenarioText = this.NorthSouthScenario |> Option.map (fun scenario -> $"\n{scenario.Text}")
-        let northScenarioText = this.NorthScenario |> Option.map (fun scenario -> $"\n{scenario.Text}")
-        let southScenarioText = this.SouthScenario |> Option.map (fun scenario -> $"\n{scenario.Text}")
-        let eastWestScenarioText = this.EastWestScenario |> Option.map (fun scenario -> $"\n{scenario.Text}")
-        let eastScenarioText = this.EastScenario |> Option.map (fun scenario -> $"\n{scenario.Text}")
-        let westScenarioText = this.WestScenario |> Option.map (fun scenario -> $"\n{scenario.Text}")
+        let contractsText = this.Contracts |> List.map (fun contract -> $"\n\t{contract.Text}") |> String.concat ""
+        let northSouthScenarioText = this.NorthSouthScenario |> Option.map (fun scenario -> $"\n\t{scenario.Text}")
+        let northScenarioText = this.NorthScenario |> Option.map (fun scenario -> $"\n\t{scenario.Text}")
+        let southScenarioText = this.SouthScenario |> Option.map (fun scenario -> $"\n\t{scenario.Text}")
+        let eastWestScenarioText = this.EastWestScenario |> Option.map (fun scenario -> $"\n\t{scenario.Text}")
+        let eastScenarioText = this.EastScenario |> Option.map (fun scenario -> $"\n\t{scenario.Text}")
+        let westScenarioText = this.WestScenario |> Option.map (fun scenario -> $"\n\t{scenario.Text}")
         let scenariosText =
             match [ northSouthScenarioText; northScenarioText; southScenarioText; eastWestScenarioText; eastScenarioText; westScenarioText ] |> List.choose id with
             | h :: t -> h :: t |> String.concat ""
             | [] -> "(none)" // should never happen
-        let customPredicateText = this.CustomPredicate |> Option.map (fun _ -> "\nwith custom predicate")
-        $"{headerText}{contractsText}{scenariosText}{customPredicateText}"
+        let customPredicateText = match this.CustomPredicate with | Some _ -> "\n\twith custom predicate" | None -> ""
+        $"{descriptionText}{headerText}{contractsText}{scenariosText}{customPredicateText}"
 
 [<RequireQualifiedAccess>]
 type Prop =
     | Contracts of ScenarioContract list
+    | Description of string
     | Dealer of Position
     | Vulnerabilities of Vulnerability * Vulnerability
     | PartnershipScenario of PartnershipScenario
@@ -162,22 +174,24 @@ type Prop =
     | CustomPredicate of (Hand * Hand * Hand * Hand -> bool)
 
 exception OtherPropIsContractsException of ScenarioContract list
-exception PropAlreadySpecifiedException of ScenarioContract list * Prop
+exception PropAlreadySpecifiedException of Prop
 
 let private folder (state:Scenario) prop =
     match prop with
     | Prop.Contracts scenarioContracts -> raise (OtherPropIsContractsException scenarioContracts) // should never happen as would not compile
-    | Prop.Dealer _ when state.Dealer |> Option.isSome -> raise (PropAlreadySpecifiedException (state.Contracts, prop))
-    | Prop.Vulnerabilities _ when state.Vulnerabilities |> Option.isSome -> raise (PropAlreadySpecifiedException (state.Contracts, prop))
+    | Prop.Description _ when state.Description |> Option.isSome -> raise (PropAlreadySpecifiedException prop)
+    | Prop.Dealer _ when state.Dealer |> Option.isSome -> raise (PropAlreadySpecifiedException prop)
+    | Prop.Vulnerabilities _ when state.Vulnerabilities |> Option.isSome -> raise (PropAlreadySpecifiedException prop)
     | Prop.PartnershipScenario scenario when
         (scenario.Partnership = NorthSouth && state.NorthSouthScenario |> Option.isSome)
-        || (scenario.Partnership = EastWest && state.EastWestScenario |> Option.isSome) -> raise (PropAlreadySpecifiedException (state.Contracts, prop))
+        || (scenario.Partnership = EastWest && state.EastWestScenario |> Option.isSome) -> raise (PropAlreadySpecifiedException prop)
     | Prop.HandScenario scenario when
         (scenario.Position = North && state.NorthScenario |> Option.isSome)
         || (scenario.Position = South && state.SouthScenario |> Option.isSome)
         || (scenario.Position = East && state.EastScenario |> Option.isSome)
-        || (scenario.Position = West && state.WestScenario |> Option.isSome) -> raise (PropAlreadySpecifiedException (state.Contracts, prop))
-    | Prop.CustomPredicate _ when state.CustomPredicate |> Option.isSome -> raise (PropAlreadySpecifiedException (state.Contracts, prop))
+        || (scenario.Position = West && state.WestScenario |> Option.isSome) -> raise (PropAlreadySpecifiedException prop)
+    | Prop.CustomPredicate _ when state.CustomPredicate |> Option.isSome -> raise (PropAlreadySpecifiedException prop)
+    | Prop.Description description -> { state with Description' = Some description }
     | Prop.Dealer dealer -> { state with Dealer' = Some dealer }
     | Prop.Vulnerabilities (northSouth, eastWest) -> { state with Vulnerabilities' = Some (northSouth, eastWest) }
     | Prop.PartnershipScenario scenario ->
@@ -193,15 +207,30 @@ let private folder (state:Scenario) prop =
     | Prop.CustomPredicate customPredicate -> { state with CustomPredicate' = Some customPredicate }
 
 exception NoPartnershipOrHandScenariosException of ScenarioContract list
+exception DuplicateCardsForHandScenariosException of (Card * Position list) list
 // TODO-NMB: More validation exceptions...
 
-let validate (state:Scenario) =
+let private validate (state:Scenario) =
     match state.NorthSouthScenario, state.NorthScenario, state.SouthScenario, state.EastWestScenario, state.EastScenario, state.WestScenario with
     | None, None, None, None, None, None -> raise (NoPartnershipOrHandScenariosException state.Contracts)
     | _ -> ()
+    let rec allCards cards (scenarios:HandScenario option list) =
+        match scenarios with
+        | h :: t ->
+            match h with
+            | Some scenario ->
+                let cards' = scenario.Cards |> List.map (fun card -> card, scenario.Position)
+                allCards (cards' @ cards)  t
+            | None -> allCards cards t
+        | [] -> cards
+    let duplicateCards =
+        allCards [] [ state.NorthScenario; state.SouthScenario; state.EastScenario; state.WestScenario ]
+        |> List.groupBy fst
+        |> List.filter (fun (_, group) -> group.Length > 1)
+        |> List.map (fun (card, group) -> card, group |> List.map snd)
+    if duplicateCards.Length > 0 then raise (DuplicateCardsForHandScenariosException duplicateCards)
     (* TODO-NMB: More validation...
-        -- Check unique Cards for HandScenarios...
-        -- Other cross-Scenario checks... *)
+        -- Other cross-[Partnership|Hand]Scenario checks... *)
     state
 
 exception NoPropsException
@@ -226,11 +255,14 @@ type ScenarioBuilder() =
     [<CustomOperation("contracts")>]
     member inline _.Contracts ((), scenarioContracts) = [ Prop.Contracts scenarioContracts ]
 
+    [<CustomOperation("description")>]
+    member inline _.Description (props, description) = Prop.Description description :: props
+
     [<CustomOperation("dealer")>]
     member inline _.Dealer (props, dealer) = Prop.Dealer dealer :: props
 
     [<CustomOperation("vulnerabilities")>]
-    member inline _.Vulnerabilities (props, (northSouth, eastWest)) = Prop.Vulnerabilities (northSouth, eastWest) :: props
+    member inline _.Vulnerabilities (props, vulnerabilities) = Prop.Vulnerabilities vulnerabilities :: props
 
     [<CustomOperation("partnership")>]
     member inline _.PartnershipScenario (props, partnershipScenario) = Prop.PartnershipScenario partnershipScenario :: props

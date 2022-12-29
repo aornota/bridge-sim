@@ -5,6 +5,8 @@ open Aornota.BridgeSim.Domain.Evaluation.Core
 open Aornota.BridgeSim.Domain.Formatting.Core
 open Aornota.BridgeSim.Domain.Simulation.ComparisonConstraint
 
+// TODO-NMB: Auto-tests (inc. failing cases)...
+
 exception EmptyListForShapeCategoriesException
 exception DuplicateShapeCategoriesException of int
 exception EmptyListForShapesException
@@ -260,7 +262,7 @@ exception CardsCannotSatisfyMaximumHandCcException of Position * Card list * int
 exception CardsCannotSatisfyMinimumSuitLengthException of Position * Card list * Suit * int
 exception CardsCannotSatisfyMaximumSuitLengthException of Position * Card list * Suit * int
 
-let validate (state:HandScenario) =
+let private validate (state:HandScenario) =
     // Only validate minimum HCP / CC / suit lengths if all Cards specified (i.e. optimistically assume constraint could be satisfied by "missing" Cards).
     if state.Cards.Length = CARDS_PER_HAND then
         let hand = Hand.Make state.Cards // can use Hand as have requisite number of Cards
