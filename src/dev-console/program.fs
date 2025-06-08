@@ -43,11 +43,13 @@ let private mainAsync () = async {
         //Scratch.Dds.forcingOpening1C 10 true
         //Scratch.Dds.forcingOpening1CAnd1HResponse 10 true
         //Scratch.Dds.forcingOpening1CAnd1SResponse 10 true
-        //Scratch.Dds.forcingOpening2C 10 true
-        //Scratch.DdsSimulation.run 2000
-        Scratch.DdsSimulation.wip ()
+        //Scratch.Dds.forcingOpening2C 10 false
+        //Scratch.DdsSimulation.run 20
+        //Scratch.DdsSimulation.wip ()
 
         //Scratch.Classification.run 10000
+
+        Scratch.Scenario.TwoCANewHope.forcingOpening2CStatistics 50000
 
         //Scratch.Scenario.FiveFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.Minimal true 5000

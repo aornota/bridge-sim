@@ -33,6 +33,7 @@
         <Compile Include="scratch\dds.fs" />
         <Compile Include="scratch\dds-simulation.fs" />
         <Compile Include="scratch\simulation.fs" />
+        <Compile Include="scratch\scenario-2c-a-new-hope.fs" />
         <Compile Include="scratch\scenario-5-4-major.fs" />
         <Compile Include="scratch\scenario-6-4-major.fs" />
         <Compile Include="scratch\scenario-no-stayman.fs" />
