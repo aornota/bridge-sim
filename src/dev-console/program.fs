@@ -52,10 +52,9 @@ let private mainAsync () = async {
         //Scratch.Scenario.TwoCANewHope.allStatistics 500000
         //Scratch.Scenario.TwoCANewHope.forcingOpening2CAnalysis Scratch.Scenario.TwoCANewHope.Basic 25000
         //Scratch.Scenario.TwoCANewHope.forcingOpening2CAnalysis Scratch.Scenario.TwoCANewHope.Advanced 25000
-        Scratch.Scenario.TwoCANewHope.forcingOpening2CAnalysis Scratch.Scenario.TwoCANewHope.AdvancedRedux 5000
+        Scratch.Scenario.TwoCANewHope.forcingOpening2CAnalysis Scratch.Scenario.TwoCANewHope.AdvancedRedux 2500
         //Scratch.Scenario.TwoCANewHope.forcingOpening2CStatistics Scratch.Scenario.TwoCANewHope.Basic 100000
         //Scratch.Scenario.TwoCANewHope.forcingOpening2CStatistics Scratch.Scenario.TwoCANewHope.Advanced 100000
-        //writeBlankLine ()
         //Scratch.Scenario.TwoCANewHope.forcingOpening2CStatistics Scratch.Scenario.TwoCANewHope.AdvancedRedux 100000
 
         //Scratch.Scenario.FiveFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10

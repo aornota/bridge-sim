@@ -34,14 +34,14 @@ type OpenerStrategy = | Basic | Advanced | AdvancedRedux
                 let spadesCount, heartsCount, _, _ = hand.SuitCounts
                 // TODO-NMB: Adjust these (e.g. based on overall frequencies)?...
                 match hand.Shape, spadesCount >= 5 || heartsCount >= 5 with
-                | FourFourFourOne, _ | FiveFourFourZero, _ -> hand.AdjustedLtc <= 4.25m // three-suiter with ALTC <= 4.25
-                | _, true -> hand.AdjustedLtc <= 5m // one-/two-suiter with 5+ major and ALTC <= 5
+                | FourFourFourOne, _ | FiveFourFourZero, _ -> hand.AdjustedLtc <= 4.5m // three-suiter with ALTC <= 4.5
+                | _, true -> hand.AdjustedLtc <= 4.75m // one-/two-suiter with 5+ major and ALTC <= 4.75
                 | _, false -> hand.AdjustedLtc <= 4.25m // one-/two-suiter without 5+ major and ALTC <= 4.25
     member this.Text =
         match this with
         | Basic -> "22+ HCP balanced or LTC <= 4"
         | Advanced -> "22+ HCP balanced or LTC <= 4 for one-/two-suiter with 5+ major or LTC <= 3 otherwise (including three-suiter with 5+ major)"
-        | AdvancedRedux -> "22+ HCP balanced or ALTC <= 5 for one-/two-suiter with 5+ major or ALTC <= 4.25 otherwise (including three-suiter with 5+ major)"
+        | AdvancedRedux -> "22+ HCP balanced or ALTC <= 4.75 for one-/two-suiter with 5+ major or ALTC <= 4.25 for one-/two-suiter without 5+ major or ALTC <= 4.5 for three-suiter"
 
 type OpenerShapeType = | BalancedO | ThreeSuiterO | TwoSuiterO | OneSuiterO
     with
