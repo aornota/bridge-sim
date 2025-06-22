@@ -49,9 +49,10 @@ type Hand with
         let spadeCount, heartCount, diamondCount, clubCount = this.SuitCounts
         $"{spadeCount}={heartCount}={diamondCount}={clubCount}"
     member this.Ltc =
-        let ltcForSuit (cards:Card list) =
-            let has rank = cards |> List.exists (fun card -> card.Rank = rank)
-            match cards with
+        let ltcForSuit suit =
+            let ranks = this.CardsForSuit suit |> List.map (fun card -> card.Rank)
+            let has rank = ranks |> List.contains rank
+            match ranks with
             | [] -> 0
             | [ _ ] -> if has Ace then 0 else 1
             | [ _ ; _ ] ->
@@ -65,4 +66,31 @@ type Hand with
                 | true, true, false | true, false, true | false, true, true -> 1
                 | true, false, false | false, true, false | false, false, true -> 2
                 | false, false, false -> 3
-        ltcForSuit (this.CardsForSuit(Spade)) + ltcForSuit (this.CardsForSuit(Heart)) + ltcForSuit (this.CardsForSuit(Diamond)) + ltcForSuit (this.CardsForSuit(Club))
+        [ Spade ; Heart ; Diamond ; Club ] |> List.map ltcForSuit |> List.sum
+    member this.AdjustedLtc =
+        // Based on https://en.wikipedia.org/wiki/Losing-Trick_Count#Refinements.
+        let adjustedLtcForSuit suit =
+            let ranks = this.CardsForSuit suit |> List.map (fun card -> card.Rank)
+            let has rank = ranks |> List.contains rank
+            match ranks with
+            | [] -> 0m
+            | [ _ ] -> if has Ace then 0m else 1m
+            | [ _ ; _ ] ->
+                match has Ace, has King, has Queen with
+                | true, true, _ -> 0m
+                | true, false, true -> 0.5m
+                | true, false, false | false, true, true -> 1m
+                | false, true, false -> 1.5m
+                | _ -> 2m
+            | _ ->
+                match has Ace, has King, has Queen, has Jack, has Ten with
+                | true, true, true, _, _ -> 0m
+                | true, true, false, _, _ -> 1m
+                | true, false, false, true, true -> 1.25m
+                | true, false, true, _, _ -> 1.5m
+                | false, true, false, true, true -> 1.75m
+                | true, false, false, _, _ | false, true, true, _, _ -> 2m
+                | false, true, false, _, _ -> 2.5m
+                | false, false, true, _, _ -> 2.75m
+                | _ -> 3m
+        [ Spade ; Heart ; Diamond ; Club ] |> List.map adjustedLtcForSuit |> List.sum

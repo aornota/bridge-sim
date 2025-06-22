@@ -50,7 +50,13 @@ let private mainAsync () = async {
         //Scratch.Classification.run 10000
 
         //Scratch.Scenario.TwoCANewHope.allStatistics 500000
-        Scratch.Scenario.TwoCANewHope.forcingOpening2CStatistics Scratch.Scenario.TwoCANewHope.Basic 1000
+        //Scratch.Scenario.TwoCANewHope.forcingOpening2CAnalysis Scratch.Scenario.TwoCANewHope.Basic 25000
+        //Scratch.Scenario.TwoCANewHope.forcingOpening2CAnalysis Scratch.Scenario.TwoCANewHope.Advanced 25000
+        Scratch.Scenario.TwoCANewHope.forcingOpening2CAnalysis Scratch.Scenario.TwoCANewHope.AdvancedRedux 5000
+        //Scratch.Scenario.TwoCANewHope.forcingOpening2CStatistics Scratch.Scenario.TwoCANewHope.Basic 100000
+        //Scratch.Scenario.TwoCANewHope.forcingOpening2CStatistics Scratch.Scenario.TwoCANewHope.Advanced 100000
+        //writeBlankLine ()
+        //Scratch.Scenario.TwoCANewHope.forcingOpening2CStatistics Scratch.Scenario.TwoCANewHope.AdvancedRedux 100000
 
         //Scratch.Scenario.FiveFourMajor.run (Scratch.Simulation.DisplayOnly true) true 10
         //Scratch.Scenario.FiveFourMajor.run Scratch.Simulation.Minimal true 5000

@@ -3,24 +3,45 @@ module Aornota.BridgeSim.DevConsole.Scratch.Scenario.TwoCANewHope
 open Aornota.BridgeSim.Common.Console
 open Aornota.BridgeSim.Dds.Interop.Dds
 open Aornota.BridgeSim.DevConsole.Common
+open Aornota.BridgeSim.DevConsole.Scratch.Dds
+open Aornota.BridgeSim.Domain.Auction
 open Aornota.BridgeSim.Domain.Core
 open Aornota.BridgeSim.Domain.Deal
 open Aornota.BridgeSim.Domain.Evaluation.Core
+open Aornota.BridgeSim.Domain.Formatting.Deal
 open Aornota.BridgeSim.Domain.Random.Deal
 
 open System
 
-// TODO-NMB: More strategies?...
-type OpenerStrategy = | Basic
+type OpenerStrategy = | Basic | Advanced | AdvancedRedux
     with
     member this.Qualifies (hand:Hand) =
         match this with
         | Basic ->
-            match hand.ShapeCategory = Balanced, hand.Hcp, hand.Ltc with
-            | true, hcp, _ when hcp >= 22<hcp> -> true // balanced with 22+ HCP
-            | false, _, ltc when ltc <= 4 -> true // not balanced with 4- LTC
-            | _ -> false
-    member this.Text = match this with | Basic -> "22+ HCP balanced or LTC <= 4"
+            if hand.ShapeCategory = Balanced then hand.Hcp >= 22<hcp> // balanced with 22+ HCP
+            else hand.Ltc <= 4 // not balanced with LTC <= 4
+        | Advanced ->
+            if hand.ShapeCategory = Balanced then hand.Hcp >= 22<hcp> // balanced with 22+ HCP
+            else
+                let spadesCount, heartsCount, _, _ = hand.SuitCounts
+                match hand.Shape, spadesCount >= 5 || heartsCount >= 5 with
+                | FourFourFourOne, _ | FiveFourFourZero, _ -> hand.Ltc <= 3 // three-suiter with LTC <= 3
+                | _, true -> hand.Ltc <= 4 // one-/two-suiter with 5+ major and LTC <= 4
+                | _, false -> hand.Ltc <= 3 // one-/two-suiter without 5+ major and LTC <= 3
+        | AdvancedRedux ->
+            if hand.ShapeCategory = Balanced then hand.Hcp >= 22<hcp> // balanced with 22+ HCP
+            else
+                let spadesCount, heartsCount, _, _ = hand.SuitCounts
+                // TODO-NMB: Adjust these (e.g. based on overall frequencies)?...
+                match hand.Shape, spadesCount >= 5 || heartsCount >= 5 with
+                | FourFourFourOne, _ | FiveFourFourZero, _ -> hand.AdjustedLtc <= 4.25m // three-suiter with ALTC <= 4.25
+                | _, true -> hand.AdjustedLtc <= 5m // one-/two-suiter with 5+ major and ALTC <= 5
+                | _, false -> hand.AdjustedLtc <= 4.25m // one-/two-suiter without 5+ major and ALTC <= 4.25
+    member this.Text =
+        match this with
+        | Basic -> "22+ HCP balanced or LTC <= 4"
+        | Advanced -> "22+ HCP balanced or LTC <= 4 for one-/two-suiter with 5+ major or LTC <= 3 otherwise (including three-suiter with 5+ major)"
+        | AdvancedRedux -> "22+ HCP balanced or ALTC <= 5 for one-/two-suiter with 5+ major or ALTC <= 4.25 otherwise (including three-suiter with 5+ major)"
 
 type OpenerShapeType = | BalancedO | ThreeSuiterO | TwoSuiterO | OneSuiterO
     with
@@ -33,12 +54,29 @@ type OpenerShapeType = | BalancedO | ThreeSuiterO | TwoSuiterO | OneSuiterO
 
 type PartnerShapeType = | BalancedP | OneSuiterP | OtherP
     with
-    static member Make = function
+    static member Make (hand:Hand) =
+        match hand.Shape with
         | FourThreeThreeThree | FourFourThreeTwo | FiveThreeThreeTwo -> BalancedP
         | FourFourFourOne | FiveFourFourZero | FiveFourTwoTwo | FiveFourThreeOne | FiveFiveTwoOne | FiveFiveThreeZero | SixFourTwoOne | SixFourThreeZero | SixFiveOneOne | SixFiveTwoZero | SixSixOneZero | SevenFiveOneZero | SevenSixZeroZero | EightFiveZeroZero -> OtherP
-        // TODO-NMB: Treat 63nn as OtherP if weak suit?...
+        // TODO-NMB: Treat 63nn as OtherP if weak suit (e.g. not if at leeast one of AKQ and at least two of AKQJT)?...
+        | SixThreeTwoTwo | SixThreeThreeOne -> OtherP
         | _ -> OneSuiterP
     member this.Text = match this with | BalancedP -> "Balanced" | OneSuiterP -> "One-suiter" | OtherP -> "Other"
+
+type PartnerResponse = | Positive of cc : int<cc> | Negative
+    with
+    static member Make (hand:Hand) =
+        // Define a positive hand as having an ace / a king / at least two queens / one queen and at least three jacks / one queen and two jacks (one of which is in the same suit as the queen).
+        if hand.Cc >= 1<cc> then Positive hand.Cc
+        else
+            let suitsForRank rank = hand.Cards |> List.choose (fun card -> if card.Rank = rank then Some card.Suit else None)
+            let queensSuits, jacksSuits = suitsForRank Queen, suitsForRank Jack
+            match queensSuits.Length, jacksSuits.Length, queensSuits with
+            | queens, _, _ when queens >= 2 -> Positive 0<cc>
+            | queens, jacks, _ when queens = 1 && jacks >= 3 -> Positive 0<cc>
+            | queens, jacks, queenSuit :: _ when queens = 1 && jacks = 2 && jacksSuits |> List.contains queenSuit -> Positive 0<cc>
+            | _ -> Negative
+    member this.Cc = match this with | Positive cc -> cc | Negative -> 0<cc>
 
 let private percentageOf ofTotal value = $"%0.2f{float (100 * value) / float ofTotal}%%"
 
@@ -57,25 +95,73 @@ let allStatistics count =
     |> List.sortBy fst
     |> List.iter (fun (shapeType, elements) -> writeNewLine $"%s{shapeType.Text} -> %s{elements.Length |> percentageOf count}" ConsoleColor.Cyan)
 
-let forcingOpening2CStatistics (openerStrategy:OpenerStrategy) count =
+let forcingOpening2CAnalysis (openerStrategy:OpenerStrategy) count =
     if count = 0 then raise CountMustBeGreaterThanZeroException
-    writeNewLine $"Statistics for 2C forcing opening hands ({openerStrategy.Text} | count = %i{count}):\n" ConsoleColor.Magenta
+    writeNewLine $"Analysis for 2C forcing opening hands ({openerStrategy.Text} | partner would pass 1-level opening | count = %i{count}):\n" ConsoleColor.Magenta
     let mutable total = 0
-    (* TODO-NMB: For double-dummy, don't restrict by position?...
     let generate _ =
         let rec check (deal:Deal) positions =
             match positions with
             | [] -> None
             | position :: remaining ->
                 let hand = deal.Hand(position)
-                match openerStrategy with
-                | Some strategy ->
-                    if strategy.Qualifies hand then Some (deal, hand)
-                    else check deal remaining
-                | None -> Some (deal, hand)
+                if openerStrategy.Qualifies hand then
+                    let partnerHand = deal.Hand(position.Partner)
+                    let partnerShape = partnerHand.Shape
+                    // TODO-NMB: Exclude cases where partner might respond (e.g. pre-emptive raise / weak jump response)?...
+                    match partnerHand.Hcp, partnerShape.MaxAny, partnerShape.MinAny with
+                    | hcp, _, _ when hcp <= 3<hcp> -> Some (deal, position)
+                    | hcp, maxAny, minAny when hcp = 4<hcp> && not (maxAny >= 5 && minAny <= 1)-> Some (deal, position)
+                    | hcp, maxAny, minAny when hcp = 5<hcp> && not (maxAny >= 5 || minAny <= 1) -> Some (deal, position)
+                    | _ -> check deal remaining
+                else check deal remaining
         total <- total + 1
-        check (Deal.MakeRandom()) [ North ; East; South ; West ]
-    *)
+        if total % 1000 = 0 then write "." ConsoleColor.DarkMagenta
+        check (Deal.MakeRandom ()) [ North ; East; South ; West ]
+    let results =
+        Seq.initInfinite generate
+        |> Seq.choose id
+        |> Seq.take count
+        |> Seq.map (fun (deal, position) ->
+            let games = (calculateDoubleDummy deal).Games(Partnership.ForPosition position)
+            let canMakeGame, canMakeNoTrumpGame = games.Length > 0, games |> List.contains NoTrump
+            let openerHand = deal.Hand position
+            let openerSpades, openerHearts, _, _ = openerHand.SuitCounts
+            let has5PlusMajor = openerSpades >= 5 || openerHearts >= 5
+            (OpenerShapeType.Make openerHand.Shape, has5PlusMajor), canMakeGame, canMakeNoTrumpGame, PartnerResponse.Make (deal.Hand position.Partner)
+        )
+        |> List.ofSeq // force evaluation
+    results
+    |> List.groupBy (fun (shapeTypeEtc, _, _, _) -> shapeTypeEtc)
+        |> List.sortBy (fun ((shapeType, has5PlusMajor), _) -> shapeType, not has5PlusMajor)
+        |> List.iter (fun ((shapeType, has5PlusMajor), elements) ->
+        let countForShapeTypeEtc = elements.Length
+        let extraText = if has5PlusMajor then "with 5+ major" else "without 5+ major"
+        writeNewLine $"O ~ %s{shapeType.Text} {extraText} -> %s{countForShapeTypeEtc |> percentageOf count}" ConsoleColor.Cyan
+        let canMakeGameCount = elements |> List.filter (fun (_, canMakeGame, _, _) -> canMakeGame) |> List.length
+        let canMakeGameNegativeCount = elements |> List.filter (fun (_, canMakeGame, _, partnerResponse) -> canMakeGame && partnerResponse.IsNegative) |> List.length
+        let canMakeGameCC0Count = elements |> List.filter (fun (_, canMakeGame, _, partnerResponse) -> canMakeGame && partnerResponse.Cc = 0<cc>) |> List.length
+        let canMakeNoTrumpGameCount = elements |> List.filter (fun (_, _, canMakeNoTrumpGame, _) -> canMakeNoTrumpGame) |> List.length
+        let canMakeNoTrumpGameNegativeCount = elements |> List.filter (fun (_, _, canMakeNoTrumpGame, partnerResponse) -> canMakeNoTrumpGame && partnerResponse.IsNegative) |> List.length
+        let canMakeNoTrumpGameCC0Count = elements |> List.filter (fun (_, _, canMakeNoTrumpGame, partnerResponse) -> canMakeNoTrumpGame && partnerResponse.Cc = 0<cc>) |> List.length
+        writeBlankLine ()
+        writeNewLine $"\tCan make game -> %s{canMakeGameCount |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeNewLine $"\tCan make game when partner negative -> %s{canMakeGameNegativeCount |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeNewLine $"\tCan make game only when partner positive -> %s{canMakeGameCount - canMakeGameNegativeCount |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeNewLine $"\tCan make game when partner 0 CC -> %s{canMakeGameCC0Count |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeNewLine $"\tCan make game only when partner 1+ CC -> %s{canMakeGameCount - canMakeGameCC0Count |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeNewLine $"\tCan make NT game -> %s{canMakeNoTrumpGameCount |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeNewLine $"\tCan make NT game when partner negative -> %s{canMakeNoTrumpGameNegativeCount |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeNewLine $"\tCan make NT game only when partner positive -> %s{canMakeNoTrumpGameCount - canMakeNoTrumpGameNegativeCount |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeNewLine $"\tCan make NT game when partner 0 CC -> %s{canMakeNoTrumpGameCC0Count |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeNewLine $"\tCan make NT game only when partner 1+ CC -> %s{canMakeNoTrumpGameCount - canMakeNoTrumpGameCC0Count |> percentageOf countForShapeTypeEtc}" ConsoleColor.DarkCyan
+        writeBlankLine ()
+    )
+
+let forcingOpening2CStatistics (openerStrategy:OpenerStrategy) count =
+    if count = 0 then raise CountMustBeGreaterThanZeroException
+    writeNewLine $"Statistics for 2C forcing opening hands ({openerStrategy.Text} | count = %i{count}):\n" ConsoleColor.Magenta
+    let mutable total = 0
     let generate _ =
         total <- total + 1
         if total % 5000 = 0 then write "." ConsoleColor.DarkMagenta
@@ -91,9 +177,10 @@ let forcingOpening2CStatistics (openerStrategy:OpenerStrategy) count =
     |> List.iter (fun (shapeType, elements) ->
         let countForShapeType = elements.Length
         writeNewLine $"O ~ %s{shapeType.Text} -> %s{countForShapeType |> percentageOf count}" ConsoleColor.Cyan
+        // TODO-NMB: Redefine CC / positive / negative (cf. forcingOpening2CAnalysis)?...
         let resultsForShapeType =
             elements
-            |> List.groupBy (fun (_, hand, partnerHand) -> PartnerShapeType.Make partnerHand.Shape, partnerHand.Cc)
+            |> List.groupBy (fun (_, hand, partnerHand) -> PartnerShapeType.Make partnerHand, partnerHand.Cc)
             |> List.sortBy fst
             |> List.map (fun (cc, elements) -> cc, elements.Length)
         let equalsFilter value = fun valueToCheck -> valueToCheck = value
@@ -102,16 +189,12 @@ let forcingOpening2CStatistics (openerStrategy:OpenerStrategy) count =
             match ccFilter with
             | Some ccFilter -> filteredForShapeType |> List.filter (fun (grouping, _) -> ccFilter (snd grouping)) |> List.sumBy snd
             | None -> filteredForShapeType |> List.sumBy snd
-        let balancedFilter, oneSuiterFilter, otherFilter = equalsFilter BalancedP, equalsFilter OneSuiterP, equalsFilter OtherP
-        let negativeFilter = equalsFilter 0<cc>
-        let balancedCount = countForShapeTypeFilter balancedFilter None
-        let balancedCountNegative = countForShapeTypeFilter balancedFilter (Some negativeFilter)
+        let balancedFilter, oneSuiterFilter, otherFilter, negativeFilter = equalsFilter BalancedP, equalsFilter OneSuiterP, equalsFilter OtherP, equalsFilter 0<cc>
+        let balancedCount, balancedCountNegative = countForShapeTypeFilter balancedFilter None, countForShapeTypeFilter balancedFilter (Some negativeFilter)
         let balancedCountPositive = balancedCount - balancedCountNegative
-        let oneSuiterCount = countForShapeTypeFilter oneSuiterFilter None
-        let oneSuiterCountNegative = countForShapeTypeFilter oneSuiterFilter (Some negativeFilter)
+        let oneSuiterCount, oneSuiterCountNegative = countForShapeTypeFilter oneSuiterFilter None, countForShapeTypeFilter oneSuiterFilter (Some negativeFilter)
         let oneSuiterCountPositive = oneSuiterCount - oneSuiterCountNegative
-        let otherCount = countForShapeTypeFilter otherFilter None
-        let otherCountNegative = countForShapeTypeFilter otherFilter (Some negativeFilter)
+        let otherCount, otherCountNegative = countForShapeTypeFilter otherFilter None, countForShapeTypeFilter otherFilter (Some negativeFilter)
         let otherCountPositive = otherCount - otherCountNegative
         writeBlankLine ()
         writeNewLine $"\tR ~ {BalancedP.Text} -> %s{balancedCount |> percentageOf countForShapeType}" ConsoleColor.DarkCyan

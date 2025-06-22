@@ -36,6 +36,21 @@ type DoubleDummyResults = private { Results' : (Position * Strain * uint) list }
         match this.Tricks(position, strain) with
         | 13u -> Some SevenLevel | 12u -> Some SixLevel | 11u -> Some FiveLevel | 10u -> Some FourLevel | 9u -> Some ThreeLevel | 8u -> Some TwoLevel | 7u -> Some OneLevel
         | _ -> None
+    member this.Games position =
+        this.Results'
+        |> List.choose (fun (position', strain, tricks) ->
+            if position' <> position then None
+            else
+                let canMakeGame =
+                    match strain with
+                    | NoTrump -> tricks >= 9u
+                    | Suit Spade | Suit Heart -> tricks >= 10u
+                    | Suit Diamond | Suit Club -> tricks >= 11u
+                if canMakeGame then Some strain else None)
+    member this.Games (partnership:Partnership)  =
+        partnership.Positions
+        |> List.collect (fun position -> this.Games position)
+        |> List.distinct
 
 let private dealPbn (deal:Deal) =
     let handPbn (hand:Hand) =
